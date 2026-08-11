@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Prazzo</title>
+    <title>Criar Conta - JusGestão Pro</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -16,56 +16,68 @@
         <div class="login-banner">
             <div class="brand">
                 <i class="fa-solid fa-scale-balanced"></i>
-                <span> <h2>Prazzo</h2></span>
+                <span>JusGestão Pro</span>
             </div>
             <div class="banner-text">
                 <h2>Gestão jurídica moderna e integrada.</h2>
-                <p>Acesse seu painel para acompanhar processos, gerenciar clientes e controlar seus prazos em um só lugar.</p>
+                <p>Cadastre-se para acompanhar processos, gerenciar clientes e controlar seus prazos em um só lugar.</p>
             </div>
         </div>
 
         <div class="login-card">
             <div class="login-header">
-                <h1>Acessar Conta</h1>
-                <p>Insira suas credenciais para continuar</p>
+                <h1>Criar Nova Conta</h1>
+                <p>Preencha as informações do advogado responsável para acessar</p>
             </div>
 
-            <form id="loginForm" onsubmit="handleLogin(event)">
+            <form id="registerForm" onsubmit="handleRegister(event)">
                 <div class="form-group">
-                    <label for="loginEmail">E-mail Profissional</label>
+                    <label for="regName">Nome Completo *</label>
+                    <div class="input-icon-wrapper">
+                        <i class="fa-regular fa-user"></i>
+                        <input type="text" id="regName" class="form-control" placeholder="Ex: Dr. Ricardo Alves" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="regOab">Número da OAB *</label>
+                    <div class="input-icon-wrapper">
+                        <i class="fa-solid fa-id-card"></i>
+                        <input type="text" id="regOab" class="form-control" placeholder="Ex: OAB/SP 452.890" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="regPhone">Número de Telefone / WhatsApp *</label>
+                    <div class="input-icon-wrapper">
+                        <i class="fa-solid fa-phone"></i>
+                        <input type="text" id="regPhone" class="form-control" placeholder="(11) 99999-8888" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="regEmail">E-mail Profissional *</label>
                     <div class="input-icon-wrapper">
                         <i class="fa-regular fa-envelope"></i>
-                        <input type="email" id="loginEmail" class="form-control" placeholder="seu.email@adv.oab.br" required>
+                        <input type="email" id="regEmail" class="form-control" placeholder="advogado@escritorio.com" required>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="loginPassword">Senha</label>
+                    <label for="regPassword">Senha *</label>
                     <div class="input-icon-wrapper">
                         <i class="fa-solid fa-lock"></i>
-                        <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" required>
+                        <input type="password" id="regPassword" class="form-control" placeholder="••••••••" required>
                     </div>
                 </div>
 
-                <div class="form-options">
-                    <label class="remember-me">
-                        <input type="checkbox" id="rememberMe">
-                        <span>Lembrar de mim</span>
-                    </label>
-                    <a href="#" class="forgot-password" onclick="alert('Instruções de recuperação enviadas para o e-mail cadastrado.')">Esqueceu a senha?</a>
-                </div>
-
-                <button type="submit" class="btn btn-primary btn-block">
-                    Entrar no Sistema <i class="fa-solid fa-arrow-right"></i>
+                <button type="submit" class="btn btn-primary btn-block" style="margin-top: 10px;">
+                    Criar Conta e Acessar <i class="fa-solid fa-user-plus"></i>
                 </button>
             </form>
-
-            <div class="login-footer">
-                <p>Ainda não tem uma conta? <a href="#" onclick="alert('Entre em contato com o suporte para criar seu acesso.')">Solicitar acesso</a></p>
-            </div>
         </div>
     </main>
 
-<script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>

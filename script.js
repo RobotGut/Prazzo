@@ -1,4 +1,8 @@
-// Base de dados padrão para o primeiro acesso
+/* ==========================================================================
+   1. DADOS PADRÃO E INICIALIZAÇÃO DO LOCALSTORAGE
+   ========================================================================== */
+
+// Base de dados padrão de clientes
 const defaultDatabase = [
     {
         code: 'CLI-1001',
@@ -32,19 +36,19 @@ const defaultDatabase = [
     }
 ];
 
-// Dados padrão do Perfil
+// Perfil de fallback caso a página seja acessada diretamente sem cadastro
 const defaultProfile = {
     name: 'Dr. Ricardo Alves',
     oab: 'OAB/SP 452.890',
-    email: 'ricardo.alves@jusgestao.com',
-    phone: '(11) 99999-8888'
+    phone: '(11) 99999-8888',
+    email: 'ricardo.alves@jusgestao.com'
 };
 
-// Carregamento do LocalStorage com fallback seguro
+// Resgata os dados gravados no cadastro (ou fallback)
 let clientsDatabase = JSON.parse(localStorage.getItem('jusgestao_clientes')) || defaultDatabase;
 let userProfile = JSON.parse(localStorage.getItem('jusgestao_perfil')) || defaultProfile;
 
-// Salvar dados no LocalStorage
+// Funções de salvamento de estado
 function saveData() {
     localStorage.setItem('jusgestao_clientes', JSON.stringify(clientsDatabase));
 }
@@ -53,7 +57,64 @@ function saveProfileData() {
     localStorage.setItem('jusgestao_perfil', JSON.stringify(userProfile));
 }
 
-// Configuração de Títulos das Abas
+
+/* ==========================================================================
+   2. GESTÃO DO PERFIL DO ADVOGADO (SIDEBAR E MODAL)
+   ========================================================================== */
+
+// Atualiza o perfil visual na barra lateral
+function renderProfile() {
+    const sidebarName = document.getElementById('sidebarName');
+    const sidebarOab = document.getElementById('sidebarOab');
+    const sidebarAvatar = document.getElementById('sidebarAvatar');
+
+    if (sidebarName) sidebarName.textContent = userProfile.name;
+    if (sidebarOab) sidebarOab.textContent = userProfile.oab;
+
+    // Gerar Iniciais para o Avatar (ex: Dr. Ricardo Alves -> DR)
+    if (sidebarAvatar && userProfile.name) {
+        const initials = userProfile.name.split(' ')
+            .filter(n => n.length > 0)
+            .map(n => n[0])
+            .join('')
+            .slice(0, 2)
+            .toUpperCase();
+        sidebarAvatar.textContent = initials || 'DR';
+    }
+}
+
+// Abre o Modal de Perfil trazendo por padrão os dados inseridos no cadastro
+function openProfileModal() {
+    document.getElementById('profileName').value = userProfile.name || '';
+    document.getElementById('profileOab').value = userProfile.oab || '';
+    document.getElementById('profilePhone').value = userProfile.phone || '';
+    document.getElementById('profileEmail').value = userProfile.email || '';
+    
+    document.getElementById('profileModalOverlay').classList.add('active');
+}
+
+function closeProfileModal() {
+    document.getElementById('profileModalOverlay').classList.remove('active');
+}
+
+// Salva as alterações feitas no Modal de Perfil
+function saveProfile(e) {
+    e.preventDefault();
+    userProfile.name = document.getElementById('profileName').value;
+    userProfile.oab = document.getElementById('profileOab').value;
+    userProfile.phone = document.getElementById('profilePhone').value;
+    userProfile.email = document.getElementById('profileEmail').value;
+
+    saveProfileData();
+    renderProfile();
+    closeProfileModal();
+}
+
+
+/* ==========================================================================
+   3. NAVEGAÇÃO ENTRE ABAS
+   ========================================================================== */
+
 const pageTitles = {
     painel: { title: 'Gestão Integrada de Clientes', sub: 'Consulte, organize e gerencie fichas jurídicas e processos em tempo real.' },
     clientes: { title: 'Base Completa de Clientes', sub: 'Gerenciamento e histórico dos clientes cadastrados.' },
@@ -63,11 +124,6 @@ const pageTitles = {
     documentos: { title: 'Modelos e Documentos Vinculados', sub: 'Download de minutas e documentos padrão.' }
 };
 
-// Seletores de Elementos
-const searchInput = document.getElementById('clientSearch');
-const suggestionsList = document.getElementById('suggestionsList');
-
-// Troca de Abas
 function switchTab(tabId, element) {
     document.querySelectorAll('.nav-link').forEach(nav => nav.classList.remove('active'));
     if (element) element.classList.add('active');
@@ -82,14 +138,17 @@ function switchTab(tabId, element) {
     }
 }
 
-// Classe de estilo da Badge de Status
+
+/* ==========================================================================
+   4. RENDERIZAÇÃO DAS TABELAS E INTERFACE
+   ========================================================================== */
+
 function getBadgeClass(status) {
     if (status === 'Em Andamento' || status === 'Recebido') return 'badge-active';
     if (status === 'Aguardando Prazo' || status === 'Pendente') return 'badge-pending';
     return 'badge-closed';
 }
 
-// Renderizar Informações na Tela
 function renderAll() {
     // 1. Tabela Resumida do Painel
     document.querySelectorAll('.clientsTableBody').forEach(tbody => {
@@ -113,7 +172,7 @@ function renderAll() {
         });
     });
 
-    // 2. Tabela Completa da Aba Clientes
+    // 2. Tabela Completa de Clientes
     const fullBody = document.getElementById('fullClientsTableBody');
     if (fullBody) {
         fullBody.innerHTML = '';
@@ -190,7 +249,11 @@ function renderAll() {
     renderProfile();
 }
 
-// Preencher campos da Dashboard
+
+/* ==========================================================================
+   5. FICHA DO CLIENTE E BUSCA RÁPIDA (AUTOCOMPLETE)
+   ========================================================================== */
+
 function fillFormWithClient(client) {
     document.getElementById('fieldCode').value = client.code;
     document.getElementById('fieldName').value = client.name;
@@ -207,11 +270,12 @@ function fillFormWithClient(client) {
     statusElem.textContent = client.status;
     statusElem.className = `badge ${getBadgeClass(client.status)}`;
 
+    const suggestionsList = document.getElementById('suggestionsList');
+    const searchInput = document.getElementById('clientSearch');
     if (suggestionsList) suggestionsList.style.display = 'none';
     if (searchInput) searchInput.value = client.name;
 }
 
-// Limpar Ficha do Cliente
 function resetForm() {
     document.getElementById('fieldCode').value = '';
     document.getElementById('fieldName').value = '';
@@ -228,10 +292,10 @@ function resetForm() {
     statusElem.textContent = 'Aguardando Seleção';
     statusElem.className = 'badge badge-pending';
 
+    const searchInput = document.getElementById('clientSearch');
     if (searchInput) searchInput.value = '';
 }
 
-// Editar e Deletar
 function editClient(code) {
     const client = clientsDatabase.find(c => c.code === code);
     if (client) {
@@ -249,7 +313,10 @@ function deleteClient(code) {
     }
 }
 
-// Busca Rápida Autocomplete
+// Evento de Busca Autocomplete
+const searchInput = document.getElementById('clientSearch');
+const suggestionsList = document.getElementById('suggestionsList');
+
 if (searchInput) {
     searchInput.addEventListener('input', (e) => {
         const query = e.target.value.toLowerCase().trim();
@@ -286,7 +353,7 @@ if (searchInput) {
     });
 }
 
-// Ocultar busca ao clicar fora
+// Oculta sugestões ao clicar fora
 document.addEventListener('click', (e) => {
     if (searchInput && suggestionsList) {
         if (!searchInput.contains(e.target) && !suggestionsList.contains(e.target)) {
@@ -295,7 +362,11 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// Modal de Cadastrar Cliente
+
+/* ==========================================================================
+   6. MODAL DE NOVO CLIENTE
+   ========================================================================== */
+
 const modalOverlay = document.getElementById('modalOverlay');
 const btnOpenModal = document.getElementById('btnOpenModal');
 const btnCloseModal = document.getElementById('btnCloseModal');
@@ -340,41 +411,9 @@ if (newClientForm) {
     });
 }
 
-// Modal do Perfil da Conta
-const profileModalOverlay = document.getElementById('profileModalOverlay');
 
-function openProfileModal() {
-    document.getElementById('profileName').value = userProfile.name;
-    document.getElementById('profileOab').value = userProfile.oab;
-    document.getElementById('profileEmail').value = userProfile.email || '';
-    document.getElementById('profilePhone').value = userProfile.phone || '';
-    profileModalOverlay.classList.add('active');
-}
+/* ==========================================================================
+   7. INICIALIZAÇÃO DA APLICAÇÃO
+   ========================================================================== */
 
-function closeProfileModal() {
-    profileModalOverlay.classList.remove('active');
-}
-
-function saveProfile(e) {
-    e.preventDefault();
-    userProfile.name = document.getElementById('profileName').value;
-    userProfile.oab = document.getElementById('profileOab').value;
-    userProfile.email = document.getElementById('profileEmail').value;
-    userProfile.phone = document.getElementById('profilePhone').value;
-
-    saveProfileData();
-    renderProfile();
-    closeProfileModal();
-}
-
-function renderProfile() {
-    document.getElementById('sidebarName').textContent = userProfile.name;
-    document.getElementById('sidebarOab').textContent = userProfile.oab;
-    
-    // Gerar Iniciais para o Avatar (Ex: Dr. Ricardo Alves -> DR)
-    const initials = userProfile.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
-    document.getElementById('sidebarAvatar').textContent = initials || 'DR';
-}
-
-// Inicializar Dados
 renderAll();
