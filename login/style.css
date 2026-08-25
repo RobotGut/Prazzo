@@ -42,16 +42,18 @@ body {
     min-height: 560px;
 }
 
-/* Banner Lateral */
+/* Banner Lateral com Imagem de Fundo */
 .login-banner {
     flex: 1;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(30, 41, 59, 0.75) 100%), 
+                url('../img/banner-login.avif') center/cover no-repeat;
     color: #ffffff;
     padding: 48px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
 }
+
 
 .brand {
     display: flex;

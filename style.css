@@ -31,16 +31,31 @@ body {
     min-height: 100vh;
 }
 
-/* Sidebar */
+/* --- Atualize esta regra no seu arquivo style.css --- */
+
+/* Sidebar com Imagem de Fundo */
 aside.sidebar {
     width: 270px;
-    background-color: var(--primary);
+    /* Imagem de banco de imagens gratuito (Unsplash) com degradê escuro por cima */
+    background-image: linear-gradient(180deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.9) 100%), 
+                      url('img/banner-login.avif');
+    background-size: cover; /* Ajusta a imagem para cobrir todo o espaço */
+    background-position: center; /* Centraliza a imagem */
+    background-repeat: no-repeat; /* Não repete a imagem */
     color: #ffffff;
     padding: 24px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     flex-shrink: 0;
+    /* Adiciona uma borda sutil à direita para separação */
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Garante que o ícone do menu 'active' (que tem fundo azul) fique bonito sobre a imagem */
+.nav-link.active {
+    background-color: var(--accent); /* Usa o azul royal definido no :root */
+    color: #ffffff;
 }
 
 .brand {
