@@ -3,480 +3,207 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Painel de Gestão Jurídica - Prazzo</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-        rel="stylesheet"
-    >
-
-    <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    >
-
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
-
-    <link
-        rel="shortcut icon"
-        href="img/Favicoin2.png"
-        type="image/x-icon"
-    >
+    <link rel="shortcut icon" href="img/Favicoin2.png" type="image/x-icon">
 </head>
-
 <body>
+
+    <!-- Overlay para fechar a sidebar no mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileSidebar()"></div>
 
     <!-- =========================================================
          SIDEBAR
          ========================================================= -->
-
-    <aside class="sidebar">
-
+    <aside class="sidebar" id="sidebar">
         <div>
-
             <div class="brand">
                 <i class="fa-solid fa-scale-balanced"></i>
                 <span>Prazzo</span>
+                <button class="mobile-close-btn" onclick="toggleMobileSidebar()" type="button">&times;</button>
             </div>
 
             <nav>
                 <ul class="nav-menu">
-
                     <li>
-                        <a
-                            class="nav-link active"
-                            onclick="switchTab('painel', this)"
-                        >
+                        <a class="nav-link active" onclick="switchTab('painel', this)">
                             <i class="fa-solid fa-chart-pie"></i>
                             Painel
                         </a>
                     </li>
-
                     <li>
-                        <a
-                            class="nav-link"
-                            onclick="switchTab('clientes', this)"
-                        >
+                        <a class="nav-link" onclick="switchTab('clientes', this)">
                             <i class="fa-solid fa-users"></i>
                             Clientes
                         </a>
                     </li>
-
                     <li>
-                        <a
-                            class="nav-link"
-                            onclick="switchTab('processos', this)"
-                        >
+                        <a class="nav-link" onclick="switchTab('processos', this)">
                             <i class="fa-solid fa-folder-open"></i>
                             Processos
                         </a>
                     </li>
-
                     <li>
-                        <a
-                            class="nav-link"
-                            onclick="switchTab('prazos', this)"
-                        >
+                        <a class="nav-link" onclick="switchTab('prazos', this)">
                             <i class="fa-solid fa-calendar-days"></i>
                             Prazos
                         </a>
                     </li>
-
                     <li>
-                        <a
-                            class="nav-link"
-                            onclick="switchTab('financeiro', this)"
-                        >
+                        <a class="nav-link" onclick="switchTab('financeiro', this)">
                             <i class="fa-solid fa-wallet"></i>
                             Financeiro
                         </a>
                     </li>
-
                     <li>
-                        <a
-                            class="nav-link"
-                            onclick="switchTab('documentos', this)"
-                        >
+                        <a class="nav-link" onclick="switchTab('documentos', this)">
                             <i class="fa-solid fa-file-contract"></i>
                             Documentos
                         </a>
                     </li>
-
                     <li>
-                        <a
-                            class="nav-link"
-                            onclick="openExportModal()"
-                        >
+                        <a class="nav-link" onclick="openExportModal()">
                             <i class="fa-solid fa-cloud-arrow-up"></i>
                             Exportar / Compartilhar
                         </a>
                     </li>
-
                 </ul>
             </nav>
-
         </div>
 
-        <div
-            class="user-profile"
-            id="btnOpenProfile"
-            onclick="openProfileModal()"
-            title="Clique para editar seu perfil"
-            style="cursor: pointer;"
-        >
-
-            <div class="avatar" id="sidebarAvatar">
-                DR
-            </div>
-
+        <div class="user-profile" id="btnOpenProfile" onclick="openProfileModal()" title="Clique para editar seu perfil">
+            <div class="avatar" id="sidebarAvatar">DR</div>
             <div class="user-info">
-                <div class="name" id="sidebarName">
-                    Dr. Ricardo Alves
-                </div>
-
-                <div class="role" id="sidebarOab">
-                    OAB/SP 452.890
-                </div>
+                <div class="name" id="sidebarName">Dr. Ricardo Alves</div>
+                <div class="role" id="sidebarOab">OAB/SP 452.890</div>
             </div>
-
         </div>
-
     </aside>
-
 
     <!-- =========================================================
          CONTEÚDO PRINCIPAL
          ========================================================= -->
-
     <main>
-
         <header>
-
-            <div class="header-title">
-
-                <h1 id="pageTitle">
-                    Gestão Integrada de Clientes
-                </h1>
-
-                <p id="pageSubtitle">
-                    Consulte, organize e gerencie fichas jurídicas e processos em tempo real.
-                </p>
-
+            <div class="header-left">
+                <!-- Botão de menu móvel -->
+                <button class="mobile-toggle-btn" onclick="toggleMobileSidebar()" type="button">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div class="header-title">
+                    <h1 id="pageTitle">Gestão Integrada de Clientes</h1>
+                    <p id="pageSubtitle">Consulte, organize e gerencie fichas jurídicas e processos em tempo real.</p>
+                </div>
             </div>
 
-            <div style="display:flex; gap:10px; flex-wrap:wrap;">
-
-                <button
-                    class="btn btn-secondary"
-                    type="button"
-                    onclick="openExportModal()"
-                >
+            <div class="header-actions">
+                <button class="btn btn-secondary" type="button" onclick="openExportModal()">
                     <i class="fa-solid fa-share-nodes"></i>
-                    Exportar
+                    <span>Exportar</span>
                 </button>
-
-                <button
-                    class="btn btn-primary"
-                    id="btnOpenModal"
-                    type="button"
-                >
+                <button class="btn btn-primary" id="btnOpenModal" type="button">
                     <i class="fa-solid fa-plus"></i>
-                    Novo Cliente
+                    <span>Novo Cliente</span>
                 </button>
-
             </div>
-
         </header>
 
-
-        <!-- =====================================================
-             PAINEL
-             ===================================================== -->
-
-        <section
-            id="tab-painel"
-            class="tab-content active"
-        >
-
+        <!-- ABA PAINEL -->
+        <section id="tab-painel" class="tab-content active">
             <div class="search-container">
-
-                <label
-                    class="search-label"
-                    for="clientSearch"
-                >
-                    Busca Rápida de Cliente
-                </label>
-
+                <label class="search-label" for="clientSearch">Busca Rápida de Cliente</label>
                 <div class="search-input-wrapper">
-
-                    <i
-                        class="fa-solid fa-magnifying-glass search-icon"
-                    ></i>
-
-                    <input
-                        type="text"
-                        id="clientSearch"
-                        class="search-input"
-                        placeholder="Digite o nome, CPF ou Código do cliente..."
-                        autocomplete="off"
-                    >
-
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" id="clientSearch" class="search-input" placeholder="Digite o nome, CPF ou Código do cliente..." autocomplete="off">
                 </div>
-
-                <div
-                    id="suggestionsList"
-                    class="suggestions-list"
-                    role="listbox"
-                ></div>
-
+                <div id="suggestionsList" class="suggestions-list" role="listbox"></div>
             </div>
 
-
-            <form
-                id="clientForm"
-                onsubmit="event.preventDefault();"
-            >
-
+            <form id="clientForm" onsubmit="event.preventDefault();">
                 <div class="details-grid">
-
-                    <!-- Dados pessoais -->
-
                     <article class="card">
-
                         <div class="card-title">
-                            <i class="fa-solid fa-user-check"></i>
-                            Dados Pessoais
+                            <i class="fa-solid fa-user-check"></i> Dados Pessoais
                         </div>
-
                         <div class="form-group">
-                            <label for="fieldCode">
-                                Código Interno
-                            </label>
-
-                            <input
-                                type="text"
-                                id="fieldCode"
-                                class="form-control"
-                                readonly
-                                placeholder="CLI-0000"
-                            >
+                            <label for="fieldCode">Código Interno</label>
+                            <input type="text" id="fieldCode" class="form-control" readonly placeholder="CLI-0000">
                         </div>
-
                         <div class="form-group">
-                            <label for="fieldName">
-                                Nome Completo
-                            </label>
-
-                            <input
-                                type="text"
-                                id="fieldName"
-                                class="form-control"
-                                placeholder="Aguardando seleção..."
-                            >
+                            <label for="fieldName">Nome Completo</label>
+                            <input type="text" id="fieldName" class="form-control" placeholder="Aguardando seleção...">
                         </div>
-
                         <div class="form-group">
-                            <label for="fieldCpf">
-                                CPF
-                            </label>
-
-                            <input
-                                type="text"
-                                id="fieldCpf"
-                                class="form-control"
-                                placeholder="000.000.000-00"
-                            >
+                            <label for="fieldCpf">CPF</label>
+                            <input type="text" id="fieldCpf" class="form-control" placeholder="000.000.000-00">
                         </div>
-
                         <div class="form-group">
-                            <label for="fieldAge">
-                                Idade / Data de Nascimento
-                            </label>
-
-                            <input
-                                type="text"
-                                id="fieldAge"
-                                class="form-control"
-                                placeholder="Ex: 42 anos (15/03/1984)"
-                            >
+                            <label for="fieldAge">Idade / Data de Nascimento</label>
+                            <input type="text" id="fieldAge" class="form-control" placeholder="Ex: 42 anos (15/03/1984)">
                         </div>
-
                     </article>
 
-
-                    <!-- Processo -->
-
                     <article class="card">
-
                         <div class="card-title">
-                            <i class="fa-solid fa-gavel"></i>
-                            Informações do Processo
+                            <i class="fa-solid fa-gavel"></i> Informações do Processo
                         </div>
-
                         <div class="form-group">
-
-                            <label for="fieldProcess">
-                                Número do Processo (CNJ)
-                            </label>
-
-                            <input
-                                type="text"
-                                id="fieldProcess"
-                                class="form-control"
-                                placeholder="0000000-00.0000.0.00.0000"
-                            >
-
+                            <label for="fieldProcess">Número do Processo (CNJ)</label>
+                            <input type="text" id="fieldProcess" class="form-control" placeholder="0000000-00.0000.0.00.0000">
                         </div>
-
                         <div class="form-group">
-
-                            <label for="fieldType">
-                                Ação Jurídica / Tipo
-                            </label>
-
-                            <input
-                                type="text"
-                                id="fieldType"
-                                class="form-control"
-                                placeholder="Ex: Trabalhista, Cível..."
-                            >
-
+                            <label for="fieldType">Ação Jurídica / Tipo</label>
+                            <input type="text" id="fieldType" class="form-control" placeholder="Ex: Trabalhista, Cível...">
                         </div>
-
                         <div class="form-group">
-
-                            <label for="fieldCourt">
-                                Vara / Tribunal
-                            </label>
-
-                            <input
-                                type="text"
-                                id="fieldCourt"
-                                class="form-control"
-                                placeholder="Ex: 3ª Vara Cível de São Paulo"
-                            >
-
+                            <label for="fieldCourt">Vara / Tribunal</label>
+                            <input type="text" id="fieldCourt" class="form-control" placeholder="Ex: 3ª Vara Cível de São Paulo">
                         </div>
-
                         <div class="form-group">
-
                             <label>Status Processual</label>
-
                             <div id="statusBadgeContainer">
-
-                                <span
-                                    class="badge badge-pending"
-                                    id="fieldStatus"
-                                >
-                                    Aguardando Seleção
-                                </span>
-
+                                <span class="badge badge-pending" id="fieldStatus">Aguardando Seleção</span>
                             </div>
-
                         </div>
-
                     </article>
-
-
-                    <!-- Contato -->
 
                     <article class="card">
-
                         <div class="card-title">
-                            <i class="fa-solid fa-clock-rotate-left"></i>
-                            Contato & Próximos Prazos
+                            <i class="fa-solid fa-clock-rotate-left"></i> Contato & Próximos Prazos
                         </div>
-
                         <div class="form-group">
-
-                            <label for="fieldPhone">
-                                Telefone / WhatsApp
-                            </label>
-
-                            <input
-                                type="text"
-                                id="fieldPhone"
-                                class="form-control"
-                                placeholder="(00) 00000-0000"
-                            >
-
+                            <label for="fieldPhone">Telefone / WhatsApp</label>
+                            <input type="text" id="fieldPhone" class="form-control" placeholder="(00) 00000-0000">
                         </div>
-
                         <div class="form-group">
-
-                            <label for="fieldEmail">
-                                E-mail
-                            </label>
-
-                            <input
-                                type="email"
-                                id="fieldEmail"
-                                class="form-control"
-                                placeholder="cliente@email.com"
-                            >
-
+                            <label for="fieldEmail">E-mail</label>
+                            <input type="email" id="fieldEmail" class="form-control" placeholder="cliente@email.com">
                         </div>
-
                         <div class="form-group">
-
-                            <label for="fieldDeadline">
-                                Próximo Prazo / Audiência
-                            </label>
-
-                            <input
-                                type="text"
-                                id="fieldDeadline"
-                                class="form-control"
-                                placeholder="Data e Descrição"
-                            >
-
+                            <label for="fieldDeadline">Próximo Prazo / Audiência</label>
+                            <input type="text" id="fieldDeadline" class="form-control" placeholder="Data e Descrição">
                         </div>
-
-                        <div
-                            class="form-group"
-                            style="margin-top:18px;"
-                        >
-
-                            <button
-                                type="button"
-                                class="btn btn-secondary btn-block"
-                                onclick="resetForm()"
-                            >
-                                <i class="fa-solid fa-eraser"></i>
-                                Limpar Ficha
+                        <div class="form-group" style="margin-top:18px;">
+                            <button type="button" class="btn btn-secondary btn-block" onclick="resetForm()">
+                                <i class="fa-solid fa-eraser"></i> Limpar Ficha
                             </button>
-
                         </div>
-
                     </article>
-
                 </div>
-
             </form>
 
-
-            <!-- Tabela -->
-
             <section class="card table-card">
-
                 <div class="section-header">
-
-                    <h2>
-                        Visão Geral dos Clientes
-                    </h2>
-
+                    <h2>Visão Geral dos Clientes</h2>
                 </div>
-
                 <div class="table-responsive">
-
                     <table class="data-table">
-
                         <thead>
-
                             <tr>
                                 <th>Código</th>
                                 <th>Nome do Cliente</th>
@@ -485,45 +212,22 @@
                                 <th>Vara / Tribunal</th>
                                 <th>Status</th>
                             </tr>
-
                         </thead>
-
                         <tbody class="clientsTableBody"></tbody>
-
                     </table>
-
                 </div>
-
             </section>
-
         </section>
 
-
-        <!-- =====================================================
-             CLIENTES
-             ===================================================== -->
-
-        <section
-            id="tab-clientes"
-            class="tab-content"
-        >
-
+        <!-- ABA CLIENTES -->
+        <section id="tab-clientes" class="tab-content">
             <section class="card table-card">
-
                 <div class="section-header">
-
-                    <h2>
-                        Base Completa de Clientes Cadastrados
-                    </h2>
-
+                    <h2>Base Completa de Clientes Cadastrados</h2>
                 </div>
-
                 <div class="table-responsive">
-
                     <table class="data-table">
-
                         <thead>
-
                             <tr>
                                 <th>Código</th>
                                 <th>Nome Completo</th>
@@ -531,49 +235,24 @@
                                 <th>Idade</th>
                                 <th>Telefone</th>
                                 <th>E-mail</th>
-                                <th style="text-align:center;">
-                                    Ações
-                                </th>
+                                <th style="text-align:center;">Ações</th>
                             </tr>
-
                         </thead>
-
                         <tbody id="fullClientsTableBody"></tbody>
-
                     </table>
-
                 </div>
-
             </section>
-
         </section>
 
-
-        <!-- =====================================================
-             PROCESSOS
-             ===================================================== -->
-
-        <section
-            id="tab-processos"
-            class="tab-content"
-        >
-
+        <!-- ABA PROCESSOS -->
+        <section id="tab-processos" class="tab-content">
             <section class="card table-card">
-
                 <div class="section-header">
-
-                    <h2>
-                        Andamento de Processos Ativos
-                    </h2>
-
+                    <h2>Andamento de Processos Ativos</h2>
                 </div>
-
                 <div class="table-responsive">
-
                     <table class="data-table">
-
                         <thead>
-
                             <tr>
                                 <th>Nº do Processo (CNJ)</th>
                                 <th>Cliente</th>
@@ -581,143 +260,54 @@
                                 <th>Vara / Tribunal</th>
                                 <th>Status</th>
                             </tr>
-
                         </thead>
-
                         <tbody id="processesTableBody"></tbody>
-
                     </table>
-
                 </div>
-
             </section>
-
         </section>
 
-
-        <!-- =====================================================
-             PRAZOS
-             ===================================================== -->
-
-        <section
-            id="tab-prazos"
-            class="tab-content"
-        >
-
+        <!-- ABA PRAZOS -->
+        <section id="tab-prazos" class="tab-content">
             <div class="section-header">
-
-                <h2>
-                    Próximas Audiências e Prazos Processuais
-                </h2>
-
+                <h2>Próximas Audiências e Prazos Processuais</h2>
             </div>
-
-            <div
-                class="timeline"
-                id="deadlinesContainer"
-            ></div>
-
+            <div class="timeline" id="deadlinesContainer"></div>
         </section>
 
-
-        <!-- =====================================================
-             FINANCEIRO
-             ===================================================== -->
-
-        <section
-            id="tab-financeiro"
-            class="tab-content"
-        >
-
+        <!-- ABA FINANCEIRO -->
+        <section id="tab-financeiro" class="tab-content">
             <div class="details-grid">
-
                 <article class="card">
-
                     <div class="card-title">
-                        <i class="fa-solid fa-money-bill-trend-up"></i>
-                        Honorários a Receber
+                        <i class="fa-solid fa-money-bill-trend-up"></i> Honorários a Receber
                     </div>
-
-                    <h3
-                        style="font-size:1.8rem;color:var(--accent);margin-top:10px;"
-                        id="totalPendingFee"
-                    >
-                        R$ 0,00
-                    </h3>
-
-                    <p
-                        style="font-size:0.8rem;color:var(--text-muted);margin-top:5px;"
-                    >
-                        Valores pendentes
-                    </p>
-
+                    <h3 style="font-size:1.8rem;color:var(--accent);margin-top:10px;" id="totalPendingFee">R$ 0,00</h3>
+                    <p style="font-size:0.8rem;color:var(--text-muted);margin-top:5px;">Valores pendentes</p>
                 </article>
-
-
                 <article class="card">
-
                     <div class="card-title">
-                        <i class="fa-solid fa-circle-check"></i>
-                        Recebido
+                        <i class="fa-solid fa-circle-check"></i> Recebido
                     </div>
-
-                    <h3
-                        style="font-size:1.8rem;color:var(--success);margin-top:10px;"
-                        id="totalReceivedFee"
-                    >
-                        R$ 0,00
-                    </h3>
-
-                    <p
-                        style="font-size:0.8rem;color:var(--text-muted);margin-top:5px;"
-                    >
-                        Honorários recebidos
-                    </p>
-
+                    <h3 style="font-size:1.8rem;color:var(--success);margin-top:10px;" id="totalReceivedFee">R$ 0,00</h3>
+                    <p style="font-size:0.8rem;color:var(--text-muted);margin-top:5px;">Honorários recebidos</p>
                 </article>
-
-
                 <article class="card">
-
                     <div class="card-title">
-                        <i class="fa-solid fa-file-invoice-dollar"></i>
-                        Contratos Ativos
+                        <i class="fa-solid fa-file-invoice-dollar"></i> Contratos Ativos
                     </div>
-
-                    <h3
-                        style="font-size:1.8rem;color:var(--text-main);margin-top:10px;"
-                        id="activeContractsCount"
-                    >
-                        0
-                    </h3>
-
-                    <p
-                        style="font-size:0.8rem;color:var(--text-muted);margin-top:5px;"
-                    >
-                        Clientes cadastrados
-                    </p>
-
+                    <h3 style="font-size:1.8rem;color:var(--text-main);margin-top:10px;" id="activeContractsCount">0</h3>
+                    <p style="font-size:0.8rem;color:var(--text-muted);margin-top:5px;">Clientes cadastrados</p>
                 </article>
-
             </div>
-
 
             <section class="card table-card">
-
                 <div class="section-header">
-
-                    <h2>
-                        Lançamentos de Honorários
-                    </h2>
-
+                    <h2>Lançamentos de Honorários</h2>
                 </div>
-
                 <div class="table-responsive">
-
                     <table class="data-table">
-
                         <thead>
-
                             <tr>
                                 <th>Cliente</th>
                                 <th>Descrição da Ação</th>
@@ -725,636 +315,194 @@
                                 <th>Vencimento</th>
                                 <th>Status</th>
                             </tr>
-
                         </thead>
-
                         <tbody id="financialTableBody"></tbody>
-
                     </table>
-
                 </div>
-
             </section>
-
         </section>
 
-
-        <!-- =====================================================
-             DOCUMENTOS
-             ===================================================== -->
-
-        <section
-            id="tab-documentos"
-            class="tab-content"
-        >
-
+        <!-- ABA DOCUMENTOS -->
+        <section id="tab-documentos" class="tab-content">
             <div class="section-header">
-
-                <h2>
-                    Modelos e Documentos Vinculados
-                </h2>
-
+                <h2>Modelos e Documentos Vinculados</h2>
             </div>
-
             <div class="details-grid">
-
                 <article class="card doc-card">
-
                     <div class="card-title">
-                        <i class="fa-solid fa-file-pdf"></i>
-                        Procuração Ad Judicia
+                        <i class="fa-solid fa-file-pdf"></i> Procuração Ad Judicia
                     </div>
-
-                    <p class="text-muted">
-                        Modelo padrão para prestação de serviços jurídicos.
-                    </p>
-
-                    <button
-                        class="btn btn-secondary"
-                        onclick="alert('Você poderá adicionar seu modelo de procuração aqui.')"
-                    >
-                        <i class="fa-solid fa-download"></i>
-                        Baixar Modelo
+                    <p class="text-muted">Modelo padrão para prestação de serviços jurídicos.</p>
+                    <button class="btn btn-secondary" onclick="alert('Você poderá adicionar seu modelo de procuração aqui.')">
+                        <i class="fa-solid fa-download"></i> Baixar Modelo
                     </button>
-
                 </article>
-
-
                 <article class="card doc-card">
-
                     <div class="card-title">
-                        <i class="fa-solid fa-file-word"></i>
-                        Contrato de Honorários
+                        <i class="fa-solid fa-file-word"></i> Contrato de Honorários
                     </div>
-
-                    <p class="text-muted">
-                        Minuta para prestação de serviços jurídicos.
-                    </p>
-
-                    <button
-                        class="btn btn-secondary"
-                        onclick="alert('Você poderá adicionar seu modelo de contrato aqui.')"
-                    >
-                        <i class="fa-solid fa-download"></i>
-                        Baixar Modelo
+                    <p class="text-muted">Minuta para prestação de serviços jurídicos.</p>
+                    <button class="btn btn-secondary" onclick="alert('Você poderá adicionar seu modelo de contrato aqui.')">
+                        <i class="fa-solid fa-download"></i> Baixar Modelo
                     </button>
-
                 </article>
-
-
                 <article class="card doc-card">
-
                     <div class="card-title">
-                        <i class="fa-solid fa-file-lines"></i>
-                        Declaração de Hipossuficiência
+                        <i class="fa-solid fa-file-lines"></i> Declaração de Hipossuficiência
                     </div>
-
-                    <p class="text-muted">
-                        Modelo de declaração para Justiça Gratuita.
-                    </p>
-
-                    <button
-                        class="btn btn-secondary"
-                        onclick="alert('Você poderá adicionar seu modelo aqui.')"
-                    >
-                        <i class="fa-solid fa-download"></i>
-                        Baixar Modelo
+                    <p class="text-muted">Modelo de declaração para Justiça Gratuita.</p>
+                    <button class="btn btn-secondary" onclick="alert('Você poderá adicionar seu modelo aqui.')">
+                        <i class="fa-solid fa-download"></i> Baixar Modelo
                     </button>
-
                 </article>
-
             </div>
-
         </section>
-
     </main>
 
-
-    <!-- =========================================================
-         MODAL NOVO CLIENTE
-         ========================================================= -->
-
-    <div
-        class="modal-overlay"
-        id="modalOverlay"
-        role="dialog"
-        aria-modal="true"
-    >
-
+    <!-- MODAL NOVO CLIENTE -->
+    <div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true">
         <div class="modal">
-
             <div class="modal-header">
-
-                <h3>
-                    Cadastrar Novo Cliente
-                </h3>
-
-                <button
-                    class="modal-close"
-                    id="btnCloseModal"
-                    type="button"
-                >
-                    &times;
-                </button>
-
+                <h3>Cadastrar Novo Cliente</h3>
+                <button class="modal-close" id="btnCloseModal" type="button">&times;</button>
             </div>
-
-
             <form id="newClientForm">
-
                 <div class="modal-grid">
-
                     <div class="form-group">
-
-                        <label for="newFormName">
-                            Nome Completo *
-                        </label>
-
-                        <input
-                            type="text"
-                            id="newFormName"
-                            class="form-control"
-                            required
-                            placeholder="Ex: Carlos Eduardo"
-                        >
-
+                        <label for="newFormName">Nome Completo *</label>
+                        <input type="text" id="newFormName" class="form-control" required placeholder="Ex: Carlos Eduardo">
                     </div>
-
-
                     <div class="form-group">
-
-                        <label for="newFormCpf">
-                            CPF *
-                        </label>
-
-                        <input
-                            type="text"
-                            id="newFormCpf"
-                            class="form-control"
-                            required
-                            placeholder="000.000.000-00"
-                        >
-
+                        <label for="newFormCpf">CPF *</label>
+                        <input type="text" id="newFormCpf" class="form-control" required placeholder="000.000.000-00">
                     </div>
-
-
                     <div class="form-group">
-
-                        <label for="newFormAge">
-                            Idade / Nascimento *
-                        </label>
-
-                        <input
-                            type="text"
-                            id="newFormAge"
-                            class="form-control"
-                            required
-                            placeholder="Ex: 35 anos"
-                        >
-
+                        <label for="newFormAge">Idade / Nascimento *</label>
+                        <input type="text" id="newFormAge" class="form-control" required placeholder="Ex: 35 anos">
                     </div>
-
-
                     <div class="form-group">
-
-                        <label for="newFormPhone">
-                            Telefone *
-                        </label>
-
-                        <input
-                            type="text"
-                            id="newFormPhone"
-                            class="form-control"
-                            required
-                            placeholder="(11) 98888-7777"
-                        >
-
+                        <label for="newFormPhone">Telefone *</label>
+                        <input type="text" id="newFormPhone" class="form-control" required placeholder="(11) 98888-7777">
                     </div>
-
-
                     <div class="form-group">
-
-                        <label for="newFormEmail">
-                            E-mail
-                        </label>
-
-                        <input
-                            type="email"
-                            id="newFormEmail"
-                            class="form-control"
-                            placeholder="cliente@email.com"
-                        >
-
+                        <label for="newFormEmail">E-mail</label>
+                        <input type="email" id="newFormEmail" class="form-control" placeholder="cliente@email.com">
                     </div>
-
-
                     <div class="form-group">
-
-                        <label for="newFormProcess">
-                            Número do Processo
-                        </label>
-
-                        <input
-                            type="text"
-                            id="newFormProcess"
-                            class="form-control"
-                            placeholder="0000000-00.0000.0.00.0000"
-                        >
-
+                        <label for="newFormProcess">Número do Processo</label>
+                        <input type="text" id="newFormProcess" class="form-control" placeholder="0000000-00.0000.0.00.0000">
                     </div>
-
-
                     <div class="form-group">
-
-                        <label for="newFormType">
-                            Tipo de Ação
-                        </label>
-
-                        <input
-                            type="text"
-                            id="newFormType"
-                            class="form-control"
-                            placeholder="Ex: Indenizatória"
-                        >
-
+                        <label for="newFormType">Tipo de Ação</label>
+                        <input type="text" id="newFormType" class="form-control" placeholder="Ex: Indenizatória">
                     </div>
-
-
                     <div class="form-group">
-
-                        <label for="newFormCourt">
-                            Vara / Tribunal
-                        </label>
-
-                        <input
-                            type="text"
-                            id="newFormCourt"
-                            class="form-control"
-                            placeholder="Ex: 1ª Vara Cível"
-                        >
-
+                        <label for="newFormCourt">Vara / Tribunal</label>
+                        <input type="text" id="newFormCourt" class="form-control" placeholder="Ex: 1ª Vara Cível">
                     </div>
-
-
                     <div class="form-group">
-
-                        <label for="newFormStatus">
-                            Status Inicial
-                        </label>
-
-                        <select
-                            id="newFormStatus"
-                            class="form-control"
-                        >
-
-                            <option value="Em Andamento">
-                                Em Andamento
-                            </option>
-
-                            <option value="Aguardando Prazo">
-                                Aguardando Prazo
-                            </option>
-
-                            <option value="Encerrado">
-                                Encerrado
-                            </option>
-
+                        <label for="newFormStatus">Status Inicial</label>
+                        <select id="newFormStatus" class="form-control">
+                            <option value="Em Andamento">Em Andamento</option>
+                            <option value="Aguardando Prazo">Aguardando Prazo</option>
+                            <option value="Encerrado">Encerrado</option>
                         </select>
-
                     </div>
-
-
                     <div class="form-group">
-
-                        <label for="newFormFee">
-                            Honorários
-                        </label>
-
-                        <input
-                            type="text"
-                            id="newFormFee"
-                            class="form-control"
-                            placeholder="Ex: R$ 5.000,00"
-                        >
-
+                        <label for="newFormFee">Honorários</label>
+                        <input type="text" id="newFormFee" class="form-control" placeholder="Ex: R$ 5.000,00">
                     </div>
-
                 </div>
-
-
                 <div class="modal-footer">
-
-                    <button
-                        type="button"
-                        class="btn btn-secondary"
-                        id="btnCancelModal"
-                    >
-                        Cancelar
-                    </button>
-
-                    <button
-                        type="submit"
-                        class="btn btn-primary"
-                    >
-                        <i class="fa-solid fa-check"></i>
-                        Salvar Cliente
-                    </button>
-
+                    <button type="button" class="btn btn-secondary" id="btnCancelModal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-check"></i> Salvar Cliente</button>
                 </div>
-
             </form>
-
         </div>
-
     </div>
 
-
-    <!-- =========================================================
-         MODAL PERFIL
-         ========================================================= -->
-
-    <div
-        class="modal-overlay"
-        id="profileModalOverlay"
-        role="dialog"
-        aria-modal="true"
-    >
-
+    <!-- MODAL PERFIL -->
+    <div class="modal-overlay" id="profileModalOverlay" role="dialog" aria-modal="true">
         <div class="modal">
-
             <div class="modal-header">
-
-                <h3>
-                    Minha Conta / Perfil do Advogado
-                </h3>
-
-                <button
-                    class="modal-close"
-                    onclick="closeProfileModal()"
-                    type="button"
-                >
-                    &times;
-                </button>
-
+                <h3>Minha Conta / Perfil do Advogado</h3>
+                <button class="modal-close" onclick="closeProfileModal()" type="button">&times;</button>
             </div>
-
-
-            <form
-                id="profileForm"
-                onsubmit="saveProfile(event)"
-            >
-
+            <form id="profileForm" onsubmit="saveProfile(event)">
                 <div class="modal-grid">
-
                     <div class="form-group">
-
-                        <label for="profileName">
-                            Nome Profissional *
-                        </label>
-
-                        <input
-                            type="text"
-                            id="profileName"
-                            class="form-control"
-                            required
-                        >
-
+                        <label for="profileName">Nome Profissional *</label>
+                        <input type="text" id="profileName" class="form-control" required>
                     </div>
-
-
                     <div class="form-group">
-
-                        <label for="profileOab">
-                            Inscrição OAB *
-                        </label>
-
-                        <input
-                            type="text"
-                            id="profileOab"
-                            class="form-control"
-                            required
-                        >
-
+                        <label for="profileOab">Inscrição OAB *</label>
+                        <input type="text" id="profileOab" class="form-control" required>
                     </div>
-
-
                     <div class="form-group">
-
-                        <label for="profileEmail">
-                            E-mail Profissional
-                        </label>
-
-                        <input
-                            type="email"
-                            id="profileEmail"
-                            class="form-control"
-                        >
-
+                        <label for="profileEmail">E-mail Profissional</label>
+                        <input type="email" id="profileEmail" class="form-control">
                     </div>
-
-
                     <div class="form-group">
-
-                        <label for="profilePhone">
-                            Telefone de Contato
-                        </label>
-
-                        <input
-                            type="text"
-                            id="profilePhone"
-                            class="form-control"
-                        >
-
+                        <label for="profilePhone">Telefone de Contato</label>
+                        <input type="text" id="profilePhone" class="form-control">
                     </div>
-
                 </div>
-
-
                 <div class="modal-footer">
-
-                    <button
-                        type="button"
-                        class="btn btn-secondary"
-                        onclick="closeProfileModal()"
-                    >
-                        Cancelar
-                    </button>
-
-                    <button
-                        type="submit"
-                        class="btn btn-primary"
-                    >
-                        Salvar Alterações
-                    </button>
-
+                    <button type="button" class="btn btn-secondary" onclick="closeProfileModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
                 </div>
-
             </form>
-
         </div>
-
     </div>
 
-
-    <!-- =========================================================
-         MODAL EXPORTAÇÃO / COMPARTILHAMENTO
-         ========================================================= -->
-
-    <div
-        class="modal-overlay"
-        id="exportModalOverlay"
-        role="dialog"
-        aria-modal="true"
-    >
-
-        <div class="modal">
-
+    <!-- MODAL EXPORTAÇÃO -->
+    <div class="modal-overlay" id="exportModalOverlay" role="dialog" aria-modal="true">
+        <div class="modal export-modal">
             <div class="modal-header">
-
-                <h3>
-                    Exportar e Compartilhar
-                </h3>
-
-                <button
-                    class="modal-close"
-                    onclick="closeExportModal()"
-                    type="button"
-                >
-                    &times;
-                </button>
-
+                <h3>Exportar e Compartilhar</h3>
+                <button class="modal-close" onclick="closeExportModal()" type="button">&times;</button>
             </div>
-
-
-            <p
-                style="color:var(--text-muted);font-size:0.9rem;line-height:1.5;margin-bottom:20px;"
-            >
-                Escolha como deseja guardar, enviar ou compartilhar os dados do Prazzo.
-                Seus dados continuam armazenados localmente neste dispositivo.
+            <p style="color:var(--text-muted);font-size:0.9rem;line-height:1.5;margin-bottom:20px;">
+                Escolha como deseja guardar, enviar ou compartilhar os dados do Prazzo. Seus dados continuam armazenados localmente neste dispositivo.
             </p>
-
-
-            <div
-                style="display:grid;grid-template-columns:1fr 1fr;gap:12px;"
-            >
-
-                <button
-                    class="btn btn-secondary"
-                    type="button"
-                    onclick="exportData()"
-                >
-                    <i class="fa-solid fa-file-code"></i>
-                    Backup JSON
+            <div class="export-grid">
+                <button class="btn btn-secondary" type="button" onclick="exportData()">
+                    <i class="fa-solid fa-file-code"></i> Backup JSON
                 </button>
-
-
-                <button
-                    class="btn btn-secondary"
-                    type="button"
-                    onclick="exportCSV()"
-                >
-                    <i class="fa-solid fa-file-csv"></i>
-                    Exportar CSV
+                <button class="btn btn-secondary" type="button" onclick="exportCSV()">
+                    <i class="fa-solid fa-file-csv"></i> Exportar CSV
                 </button>
-
-
-                <button
-                    class="btn btn-secondary"
-                    type="button"
-                    onclick="shareData()"
-                >
-                    <i class="fa-solid fa-share-nodes"></i>
-                    Compartilhar
+                <button class="btn btn-secondary" type="button" onclick="shareData()">
+                    <i class="fa-solid fa-share-nodes"></i> Compartilhar
                 </button>
-
-
-                <button
-                    class="btn btn-secondary"
-                    type="button"
-                    onclick="sendByEmail()"
-                >
-                    <i class="fa-solid fa-envelope"></i>
-                    Preparar E-mail
+                <button class="btn btn-secondary" type="button" onclick="sendByEmail()">
+                    <i class="fa-solid fa-envelope"></i> Preparar E-mail
                 </button>
-
-
-                <button
-                    class="btn btn-secondary"
-                    type="button"
-                    onclick="copyDataToClipboard()"
-                >
-                    <i class="fa-solid fa-copy"></i>
-                    Copiar Dados
+                <button class="btn btn-secondary" type="button" onclick="copyDataToClipboard()">
+                    <i class="fa-solid fa-copy"></i> Copiar Dados
                 </button>
-
-
-                <button
-                    class="btn btn-secondary"
-                    type="button"
-                    onclick="printReport()"
-                >
-                    <i class="fa-solid fa-print"></i>
-                    Imprimir / PDF
+                <button class="btn btn-secondary" type="button" onclick="window.print()">
+                    <i class="fa-solid fa-print"></i> Imprimir / PDF
                 </button>
-
             </div>
 
-
-            <div
-                style="margin-top:20px;padding:14px;background:#f8fafc;border:1px solid var(--border-color);border-radius:8px;"
-            >
-
-                <strong style="font-size:0.85rem;">
-                    Importar backup
-                </strong>
-
-                <p
-                    style="font-size:0.78rem;color:var(--text-muted);margin:5px 0 12px;"
-                >
+            <div style="margin-top:20px;padding:14px;background:#f8fafc;border:1px solid var(--border-color);border-radius:8px;">
+                <strong style="font-size:0.85rem;">Importar backup</strong>
+                <p style="font-size:0.78rem;color:var(--text-muted);margin:5px 0 12px;">
                     Use um arquivo JSON exportado anteriormente para recuperar seus dados.
                 </p>
-
-                <button
-                    class="btn btn-primary"
-                    type="button"
-                    onclick="document.getElementById('importFile').click()"
-                >
-                    <i class="fa-solid fa-file-import"></i>
-                    Importar JSON
+                <button class="btn btn-primary" type="button" onclick="document.getElementById('importFile').click()">
+                    <i class="fa-solid fa-file-import"></i> Importar 
                 </button>
-
-                <input
-                    type="file"
-                    id="importFile"
-                    accept=".json,application/json"
-                    style="display:none;"
-                >
-
+                <input type="file" id="importFile" accept=".json,application/json" style="display:none;" onchange="importJSON(event)">
             </div>
-
 
             <div class="modal-footer">
-
-                <button
-                    type="button"
-                    class="btn btn-secondary"
-                    onclick="closeExportModal()"
-                >
-                    Fechar
-                </button>
-
+                <button type="button" class="btn btn-secondary" onclick="closeExportModal()">Fechar</button>
             </div>
-
         </div>
-
     </div>
 
-
-    <!-- =========================================================
-         JAVASCRIPT
-         ========================================================= -->
-
     <script src="script.js"></script>
-
 </body>
 </html>

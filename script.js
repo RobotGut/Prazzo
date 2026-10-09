@@ -3,7 +3,6 @@
    Dados locais + Importação + Exportação + Compartilhamento
    ========================================================= */
 
-
 /* =========================================================
    1. BANCO DE DADOS PADRÃO
    ========================================================= */
@@ -78,18 +77,18 @@ function loadProfile() {
 
     if (savedProfile) {
         try {
-            userProfile = {
+            return {
                 ...defaultProfile,
                 ...JSON.parse(savedProfile)
             };
         } catch (error) {
             console.error('Erro ao carregar perfil:', error);
-            userProfile = { ...defaultProfile };
+            return { ...defaultProfile };
         }
     } else {
-        userProfile = {
-            name: '',
-            oab: '',
+        return {
+            name: 'Dr. Ricardo Alves',
+            oab: 'OAB/SP 452.890',
             phone: '',
             email: ''
         };
@@ -125,11 +124,11 @@ function renderProfile() {
     const sidebarAvatar = document.getElementById('sidebarAvatar');
 
     if (sidebarName) {
-        sidebarName.textContent = userProfile.name || '';
+        sidebarName.textContent = userProfile.name || 'Advogado';
     }
 
     if (sidebarOab) {
-        sidebarOab.textContent = userProfile.oab || '';
+        sidebarOab.textContent = userProfile.oab || 'OAB Pendente';
     }
 
     if (sidebarAvatar && userProfile.name) {
@@ -197,7 +196,7 @@ function saveProfile(event) {
 
 
 /* =========================================================
-   4. NAVEGAÇÃO
+   4. NAVEGAÇÃO & CONTROLE DA SIDEBAR MOBILE
    ========================================================= */
 
 const pageTitles = {
@@ -257,6 +256,26 @@ function switchTab(tabId, element) {
         if (subtitle) {
             subtitle.textContent = pageTitles[tabId].sub;
         }
+    }
+
+    // Fecha a sidebar automaticamente ao clicar em um item no mobile
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    if (sidebar && sidebar.classList.contains('mobile-open')) {
+        sidebar.classList.remove('mobile-open');
+        if (overlay) overlay.classList.remove('active');
+    }
+}
+
+function toggleMobileSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+
+    if (sidebar) {
+        sidebar.classList.toggle('mobile-open');
+    }
+    if (overlay) {
+        overlay.classList.toggle('active');
     }
 }
 
@@ -327,38 +346,20 @@ function renderDashboardTable() {
             clientsDatabase.forEach(client => {
 
                 const tr = document.createElement('tr');
-
                 tr.style.cursor = 'pointer';
 
                 tr.addEventListener('click', () => {
-                    const painelLink =
-                        document.querySelector('.nav-link');
-
+                    const painelLink = document.querySelector('.nav-link');
                     switchTab('painel', painelLink);
                     fillFormWithClient(client);
                 });
 
                 tr.innerHTML = `
-                    <td>
-                        <strong>${escapeHTML(client.code)}</strong>
-                    </td>
-
-                    <td>
-                        ${escapeHTML(client.name)}
-                    </td>
-
-                    <td>
-                        ${escapeHTML(client.cpf)}
-                    </td>
-
-                    <td>
-                        ${escapeHTML(client.process)}
-                    </td>
-
-                    <td>
-                        ${escapeHTML(client.court)}
-                    </td>
-
+                    <td><strong>${escapeHTML(client.code)}</strong></td>
+                    <td>${escapeHTML(client.name)}</td>
+                    <td>${escapeHTML(client.cpf)}</td>
+                    <td>${escapeHTML(client.process)}</td>
+                    <td>${escapeHTML(client.court)}</td>
                     <td>
                         <span class="badge ${getBadgeClass(client.status)}">
                             ${escapeHTML(client.status)}
@@ -377,9 +378,7 @@ function renderDashboardTable() {
    ========================================================= */
 
 function renderClientsTable() {
-    const body = document.getElementById(
-        'fullClientsTableBody'
-    );
+    const body = document.getElementById('fullClientsTableBody');
 
     if (!body) return;
 
@@ -390,32 +389,13 @@ function renderClientsTable() {
         const tr = document.createElement('tr');
 
         tr.innerHTML = `
-            <td>
-                <strong>${escapeHTML(client.code)}</strong>
-            </td>
-
-            <td>
-                ${escapeHTML(client.name)}
-            </td>
-
-            <td>
-                ${escapeHTML(client.cpf)}
-            </td>
-
-            <td>
-                ${escapeHTML(client.age)}
-            </td>
-
-            <td>
-                ${escapeHTML(client.phone)}
-            </td>
-
-            <td>
-                ${escapeHTML(client.email)}
-            </td>
-
+            <td><strong>${escapeHTML(client.code)}</strong></td>
+            <td>${escapeHTML(client.name)}</td>
+            <td>${escapeHTML(client.cpf)}</td>
+            <td>${escapeHTML(client.age)}</td>
+            <td>${escapeHTML(client.phone)}</td>
+            <td>${escapeHTML(client.email)}</td>
             <td style="text-align:center;">
-
                 <button
                     type="button"
                     onclick="editClient('${escapeHTML(client.code)}')"
@@ -424,7 +404,6 @@ function renderClientsTable() {
                 >
                     <i class="fa-solid fa-pen"></i>
                 </button>
-
                 <button
                     type="button"
                     onclick="deleteClient('${escapeHTML(client.code)}')"
@@ -433,7 +412,6 @@ function renderClientsTable() {
                 >
                     <i class="fa-solid fa-trash"></i>
                 </button>
-
             </td>
         `;
 
@@ -447,43 +425,24 @@ function renderClientsTable() {
    ========================================================= */
 
 function renderProcessesTable() {
-    const body = document.getElementById(
-        'processesTableBody'
-    );
+    const body = document.getElementById('processesTableBody');
 
     if (!body) return;
 
     body.innerHTML = '';
 
     clientsDatabase.forEach(client => {
-
         body.innerHTML += `
             <tr>
-
-                <td>
-                    <strong>
-                        ${escapeHTML(client.process)}
-                    </strong>
-                </td>
-
-                <td>
-                    ${escapeHTML(client.name)}
-                </td>
-
-                <td>
-                    ${escapeHTML(client.type)}
-                </td>
-
-                <td>
-                    ${escapeHTML(client.court)}
-                </td>
-
+                <td><strong>${escapeHTML(client.process)}</strong></td>
+                <td>${escapeHTML(client.name)}</td>
+                <td>${escapeHTML(client.type)}</td>
+                <td>${escapeHTML(client.court)}</td>
                 <td>
                     <span class="badge ${getBadgeClass(client.status)}">
                         ${escapeHTML(client.status)}
                     </span>
                 </td>
-
             </tr>
         `;
     });
@@ -495,8 +454,7 @@ function renderProcessesTable() {
    ========================================================= */
 
 function renderDeadlines() {
-    const container =
-        document.getElementById('deadlinesContainer');
+    const container = document.getElementById('deadlinesContainer');
 
     if (!container) return;
 
@@ -506,35 +464,21 @@ function renderDeadlines() {
 
         container.innerHTML += `
             <div class="timeline-item">
-
                 <div>
-
                     <div class="timeline-date">
                         <i class="fa-regular fa-clock"></i>
                         ${escapeHTML(client.deadline)}
                     </div>
-
-                    <div
-                        style="font-weight:600;margin-top:4px;color:var(--text-main);"
-                    >
-                        Cliente:
-                        ${escapeHTML(client.name)}
-                        (${escapeHTML(client.code)})
+                    <div style="font-weight:600;margin-top:4px;color:var(--text-main);">
+                        Cliente: ${escapeHTML(client.name)} (${escapeHTML(client.code)})
                     </div>
-
-                    <div
-                        style="font-size:0.85rem;color:var(--text-muted);"
-                    >
-                        Processo:
-                        ${escapeHTML(client.process)}
+                    <div style="font-size:0.85rem;color:var(--text-muted);">
+                        Processo: ${escapeHTML(client.process)}
                     </div>
-
                 </div>
-
                 <span class="badge ${getBadgeClass(client.status)}">
                     ${escapeHTML(client.status)}
                 </span>
-
             </div>
         `;
     });
@@ -555,86 +499,49 @@ function moneyToNumber(value) {
 
     const number = parseFloat(normalized);
 
-    return Number.isFinite(number)
-        ? number
-        : 0;
+    return Number.isFinite(number) ? number : 0;
 }
 
 function formatCurrency(value) {
-    return new Intl.NumberFormat(
-        'pt-BR',
-        {
-            style: 'currency',
-            currency: 'BRL'
-        }
-    ).format(value);
+    return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+    }).format(value);
 }
 
 function renderFinancialTable() {
-    const body =
-        document.getElementById('financialTableBody');
+    const body = document.getElementById('financialTableBody');
 
     if (!body) return;
 
     body.innerHTML = '';
 
     clientsDatabase.forEach(client => {
-
         body.innerHTML += `
             <tr>
-
+                <td><strong>${escapeHTML(client.name)}</strong></td>
+                <td>Ação ${escapeHTML(client.type)}</td>
+                <td><strong>${escapeHTML(client.fee || 'R$ 0,00')}</strong></td>
+                <td>${escapeHTML(client.deadline || 'Não informado')}</td>
                 <td>
-                    <strong>
-                        ${escapeHTML(client.name)}
-                    </strong>
-                </td>
-
-                <td>
-                    Ação ${escapeHTML(client.type)}
-                </td>
-
-                <td>
-                    <strong>
-                        ${escapeHTML(client.fee || 'R$ 0,00')}
-                    </strong>
-                </td>
-
-                <td>
-                    ${escapeHTML(
-                        client.deadline || 'Não informado'
-                    )}
-                </td>
-
-                <td>
-                    <span class="badge ${getBadgeClass(
-                        client.feeStatus || 'Pendente'
-                    )}">
-                        ${escapeHTML(
-                            client.feeStatus || 'Pendente'
-                        )}
+                    <span class="badge ${getBadgeClass(client.feeStatus || 'Pendente')}">
+                        ${escapeHTML(client.feeStatus || 'Pendente')}
                     </span>
                 </td>
-
             </tr>
         `;
     });
 }
 
 function updateFinancialSummary() {
-    const pendingElement =
-        document.getElementById('totalPendingFee');
-
-    const receivedElement =
-        document.getElementById('totalReceivedFee');
-
-    const contractsElement =
-        document.getElementById('activeContractsCount');
+    const pendingElement = document.getElementById('totalPendingFee');
+    const receivedElement = document.getElementById('totalReceivedFee');
+    const contractsElement = document.getElementById('activeContractsCount');
 
     let pending = 0;
     let received = 0;
 
     clientsDatabase.forEach(client => {
-
         const value = moneyToNumber(client.fee);
 
         if (client.feeStatus === 'Recebido') {
@@ -644,20 +551,9 @@ function updateFinancialSummary() {
         }
     });
 
-    if (pendingElement) {
-        pendingElement.textContent =
-            formatCurrency(pending);
-    }
-
-    if (receivedElement) {
-        receivedElement.textContent =
-            formatCurrency(received);
-    }
-
-    if (contractsElement) {
-        contractsElement.textContent =
-            clientsDatabase.length;
-    }
+    if (pendingElement) pendingElement.textContent = formatCurrency(pending);
+    if (receivedElement) receivedElement.textContent = formatCurrency(received);
+    if (contractsElement) contractsElement.textContent = clientsDatabase.length;
 }
 
 
@@ -680,80 +576,45 @@ function fillFormWithClient(client) {
     };
 
     Object.entries(fields).forEach(([id, value]) => {
-
         const element = document.getElementById(id);
-
-        if (element) {
-            element.value = value;
-        }
+        if (element) element.value = value;
     });
 
-    const statusElement =
-        document.getElementById('fieldStatus');
+    const statusElement = document.getElementById('fieldStatus');
 
     if (statusElement) {
-        statusElement.textContent =
-            client.status || 'Aguardando Seleção';
-
-        statusElement.className =
-            `badge ${getBadgeClass(client.status)}`;
+        statusElement.textContent = client.status || 'Aguardando Seleção';
+        statusElement.className = `badge ${getBadgeClass(client.status)}`;
     }
 
-    const suggestions =
-        document.getElementById('suggestionsList');
+    const suggestions = document.getElementById('suggestionsList');
+    const search = document.getElementById('clientSearch');
 
-    const search =
-        document.getElementById('clientSearch');
-
-    if (suggestions) {
-        suggestions.style.display = 'none';
-    }
-
-    if (search) {
-        search.value = client.name;
-    }
+    if (suggestions) suggestions.style.display = 'none';
+    if (search) search.value = client.name;
 }
 
 function resetForm() {
     const ids = [
-        'fieldCode',
-        'fieldName',
-        'fieldCpf',
-        'fieldAge',
-        'fieldProcess',
-        'fieldType',
-        'fieldCourt',
-        'fieldPhone',
-        'fieldEmail',
-        'fieldDeadline'
+        'fieldCode', 'fieldName', 'fieldCpf', 'fieldAge',
+        'fieldProcess', 'fieldType', 'fieldCourt',
+        'fieldPhone', 'fieldEmail', 'fieldDeadline'
     ];
 
     ids.forEach(id => {
-
         const element = document.getElementById(id);
-
-        if (element) {
-            element.value = '';
-        }
+        if (element) element.value = '';
     });
 
-    const status =
-        document.getElementById('fieldStatus');
+    const status = document.getElementById('fieldStatus');
 
     if (status) {
-        status.textContent =
-            'Aguardando Seleção';
-
-        status.className =
-            'badge badge-pending';
+        status.textContent = 'Aguardando Seleção';
+        status.className = 'badge badge-pending';
     }
 
-    const search =
-        document.getElementById('clientSearch');
-
-    if (search) {
-        search.value = '';
-    }
+    const search = document.getElementById('clientSearch');
+    if (search) search.value = '';
 }
 
 
@@ -762,22 +623,17 @@ function resetForm() {
    ========================================================= */
 
 function editClient(code) {
-    const client =
-        clientsDatabase.find(item => item.code === code);
+    const client = clientsDatabase.find(item => item.code === code);
 
     if (!client) return;
 
-    const painelLink =
-        document.querySelector('.nav-link');
-
+    const painelLink = document.querySelector('.nav-link');
     switchTab('painel', painelLink);
-
     fillFormWithClient(client);
 }
 
 function deleteClient(code) {
-    const client =
-        clientsDatabase.find(item => item.code === code);
+    const client = clientsDatabase.find(item => item.code === code);
 
     if (!client) return;
 
@@ -787,8 +643,7 @@ function deleteClient(code) {
 
     if (!confirmed) return;
 
-    clientsDatabase =
-        clientsDatabase.filter(item => item.code !== code);
+    clientsDatabase = clientsDatabase.filter(item => item.code !== code);
 
     saveData();
     renderAll();
@@ -801,43 +656,27 @@ function deleteClient(code) {
    ========================================================= */
 
 function setupSearch() {
-    const searchInput =
-        document.getElementById('clientSearch');
-
-    const suggestionsList =
-        document.getElementById('suggestionsList');
+    const searchInput = document.getElementById('clientSearch');
+    const suggestionsList = document.getElementById('suggestionsList');
 
     if (!searchInput || !suggestionsList) return;
 
     searchInput.addEventListener('input', event => {
 
-        const query =
-            event.target.value
-                .toLowerCase()
-                .trim();
+        const query = event.target.value.toLowerCase().trim();
 
         if (!query) {
             suggestionsList.style.display = 'none';
             return;
         }
 
-        const matches =
-            clientsDatabase.filter(client => {
-
-                return (
-                    String(client.name)
-                        .toLowerCase()
-                        .includes(query) ||
-
-                    String(client.cpf)
-                        .toLowerCase()
-                        .includes(query) ||
-
-                    String(client.code)
-                        .toLowerCase()
-                        .includes(query)
-                );
-            });
+        const matches = clientsDatabase.filter(client => {
+            return (
+                String(client.name).toLowerCase().includes(query) ||
+                String(client.cpf).toLowerCase().includes(query) ||
+                String(client.code).toLowerCase().includes(query)
+            );
+        });
 
         if (!matches.length) {
             suggestionsList.style.display = 'none';
@@ -847,28 +686,16 @@ function setupSearch() {
         suggestionsList.innerHTML = '';
 
         matches.forEach(client => {
-
-            const div =
-                document.createElement('div');
-
-            div.className =
-                'suggestion-item';
+            const div = document.createElement('div');
+            div.className = 'suggestion-item';
 
             div.innerHTML = `
                 <div class="suggestion-info">
-
-                    <div class="client-name">
-                        ${escapeHTML(client.name)}
-                    </div>
-
+                    <div class="client-name">${escapeHTML(client.name)}</div>
                     <div class="client-meta">
-                        CPF: ${escapeHTML(client.cpf)}
-                        |
-                        Proc: ${escapeHTML(client.process)}
+                        CPF: ${escapeHTML(client.cpf)} | Proc: ${escapeHTML(client.process)}
                     </div>
-
                 </div>
-
                 <span class="badge ${getBadgeClass(client.status)}">
                     ${escapeHTML(client.code)}
                 </span>
@@ -885,7 +712,6 @@ function setupSearch() {
     });
 
     document.addEventListener('click', event => {
-
         if (
             !searchInput.contains(event.target) &&
             !suggestionsList.contains(event.target)
@@ -901,20 +727,11 @@ function setupSearch() {
    ========================================================= */
 
 function setupNewClientModal() {
-    const modal =
-        document.getElementById('modalOverlay');
-
-    const openButton =
-        document.getElementById('btnOpenModal');
-
-    const closeButton =
-        document.getElementById('btnCloseModal');
-
-    const cancelButton =
-        document.getElementById('btnCancelModal');
-
-    const form =
-        document.getElementById('newClientForm');
+    const modal = document.getElementById('modalOverlay');
+    const openButton = document.getElementById('btnOpenModal');
+    const closeButton = document.getElementById('btnCloseModal');
+    const cancelButton = document.getElementById('btnCancelModal');
+    const form = document.getElementById('newClientForm');
 
     if (!modal || !form) return;
 
@@ -928,94 +745,43 @@ function setupNewClientModal() {
         });
     }
 
-    if (closeButton) {
-        closeButton.addEventListener(
-            'click',
-            closeModal
-        );
-    }
-
-    if (cancelButton) {
-        cancelButton.addEventListener(
-            'click',
-            closeModal
-        );
-    }
+    if (closeButton) closeButton.addEventListener('click', closeModal);
+    if (cancelButton) cancelButton.addEventListener('click', closeModal);
 
     form.addEventListener('submit', event => {
-
         event.preventDefault();
 
-        const name =
-            document.getElementById('newFormName').value.trim();
-
-        const cpf =
-            document.getElementById('newFormCpf').value.trim();
-
-        const age =
-            document.getElementById('newFormAge').value.trim();
-
-        const phone =
-            document.getElementById('newFormPhone').value.trim();
+        const name = document.getElementById('newFormName').value.trim();
+        const cpf = document.getElementById('newFormCpf').value.trim();
+        const age = document.getElementById('newFormAge').value.trim();
+        const phone = document.getElementById('newFormPhone').value.trim();
 
         if (!name || !cpf || !age || !phone) {
             alert('Preencha todos os campos obrigatórios.');
             return;
         }
 
-        const numbers = clientsDatabase
-            .map(client => {
-                const match =
-                    String(client.code).match(/CLI-(\d+)/);
+        const numbers = clientsDatabase.map(client => {
+            const match = String(client.code).match(/CLI-(\d+)/);
+            return match ? Number(match[1]) : 1000;
+        });
 
-                return match
-                    ? Number(match[1])
-                    : 1000;
-            });
-
-        const nextNumber =
-            Math.max(1000, ...numbers) + 1;
+        const nextNumber = Math.max(1000, ...numbers) + 1;
 
         const newClient = {
-
             code: `CLI-${nextNumber}`,
-
             name,
-
             cpf,
-
             age,
-
-            process:
-                document.getElementById('newFormProcess').value.trim()
-                || '0000000-00.0000.0.00.0000',
-
-            type:
-                document.getElementById('newFormType').value.trim()
-                || 'Geral',
-
-            court:
-                document.getElementById('newFormCourt').value.trim()
-                || 'Não Informada',
-
-            status:
-                document.getElementById('newFormStatus').value,
-
+            process: document.getElementById('newFormProcess').value.trim() || '0000000-00.0000.0.00.0000',
+            type: document.getElementById('newFormType').value.trim() || 'Geral',
+            court: document.getElementById('newFormCourt').value.trim() || 'Não Informada',
+            status: document.getElementById('newFormStatus').value,
             phone,
-
-            email:
-                document.getElementById('newFormEmail').value.trim()
-                || '',
-
-            deadline:
-                'A definir',
-
-            fee:
-                document.getElementById('newFormFee').value.trim()
-                || 'R$ 0,00',
-
-            feeStatus:
-                'Pendente'
+            email: document.getElementById('newFormEmail').value.trim() || '',
+            deadline: 'A definir',
+            fee: document.getElementById('newFormFee').value.trim() || 'R$ 0,00',
+            feeStatus: 'Pendente'
         };
 
         clientsDatabase.unshift(newClient);
@@ -1025,17 +791,11 @@ function setupNewClientModal() {
         fillFormWithClient(newClient);
 
         form.reset();
-
         closeModal();
 
-        switchTab(
-            'painel',
-            document.querySelector('.nav-link')
-        );
+        switchTab('painel', document.querySelector('.nav-link'));
 
-        alert(
-            `Cliente ${newClient.code} cadastrado com sucesso.`
-        );
+        alert(`Cliente ${newClient.code} cadastrado com sucesso.`);
     });
 }
 
@@ -1045,26 +805,18 @@ function setupNewClientModal() {
    ========================================================= */
 
 function openExportModal() {
-    const modal =
-        document.getElementById('exportModalOverlay');
-
-    if (modal) {
-        modal.classList.add('active');
-    }
+    const modal = document.getElementById('exportModalOverlay');
+    if (modal) modal.classList.add('active');
 }
 
 function closeExportModal() {
-    const modal =
-        document.getElementById('exportModalOverlay');
-
-    if (modal) {
-        modal.classList.remove('active');
-    }
+    const modal = document.getElementById('exportModalOverlay');
+    if (modal) modal.classList.remove('active');
 }
 
 
 /* =========================================================
-   18. GERAR BACKUP
+   18. GERAR BACKUP E DOWNLOADS
    ========================================================= */
 
 function createBackupObject() {
@@ -1078,30 +830,19 @@ function createBackupObject() {
 }
 
 function createBackupJSON() {
-    return JSON.stringify(
-        createBackupObject(),
-        null,
-        2
-    );
+    return JSON.stringify(createBackupObject(), null, 2);
 }
 
 function downloadFile(content, filename, type) {
-    const blob =
-        new Blob([content], { type });
-
-    const url =
-        URL.createObjectURL(blob);
-
-    const link =
-        document.createElement('a');
+    const blob = new Blob([content], { type });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
 
     link.href = url;
     link.download = filename;
 
     document.body.appendChild(link);
-
     link.click();
-
     link.remove();
 
     URL.revokeObjectURL(url);
@@ -1109,17 +850,12 @@ function downloadFile(content, filename, type) {
 
 
 /* =========================================================
-   19. EXPORTAR JSON
+   19. EXPORTAR JSON E CSV
    ========================================================= */
 
 function exportData() {
-    const json =
-        createBackupJSON();
-
-    const date =
-        new Date()
-            .toISOString()
-            .slice(0, 10);
+    const json = createBackupJSON();
+    const date = new Date().toISOString().slice(0, 10);
 
     downloadFile(
         json,
@@ -1127,74 +863,34 @@ function exportData() {
         'application/json;charset=utf-8'
     );
 
-    alert(
-        'Backup JSON exportado com sucesso.'
-    );
+    alert('Backup JSON exportado com sucesso.');
 }
 
-
-/* =========================================================
-   20. EXPORTAR CSV
-   ========================================================= */
-
 function csvEscape(value) {
-    const text =
-        String(value ?? '');
-
+    const text = String(value ?? '');
     return `"${text.replace(/"/g, '""')}"`;
 }
 
 function exportCSV() {
     const headers = [
-        'Código',
-        'Nome',
-        'CPF',
-        'Idade',
-        'Processo',
-        'Tipo',
-        'Vara/Tribunal',
-        'Status',
-        'Telefone',
-        'E-mail',
-        'Prazo',
-        'Honorários',
-        'Status Honorários'
+        'Código', 'Nome', 'CPF', 'Idade', 'Processo', 'Tipo',
+        'Vara/Tribunal', 'Status', 'Telefone', 'E-mail',
+        'Prazo', 'Honorários', 'Status Honorários'
     ];
 
     const rows = clientsDatabase.map(client => [
-
-        client.code,
-        client.name,
-        client.cpf,
-        client.age,
-        client.process,
-        client.type,
-        client.court,
-        client.status,
-        client.phone,
-        client.email,
-        client.deadline,
-        client.fee,
+        client.code, client.name, client.cpf, client.age,
+        client.process, client.type, client.court, client.status,
+        client.phone, client.email, client.deadline, client.fee,
         client.feeStatus
-
     ]);
 
-    const csv = [
-        headers,
-        ...rows
-    ]
-        .map(row =>
-            row.map(csvEscape).join(';')
-        )
+    const csv = [headers, ...rows]
+        .map(row => row.map(csvEscape).join(';'))
         .join('\r\n');
 
-    const content =
-        '\uFEFF' + csv;
-
-    const date =
-        new Date()
-            .toISOString()
-            .slice(0, 10);
+    const content = '\uFEFF' + csv;
+    const date = new Date().toISOString().slice(0, 10);
 
     downloadFile(
         content,
@@ -1202,306 +898,131 @@ function exportCSV() {
         'text/csv;charset=utf-8'
     );
 
-    alert(
-        'Arquivo CSV exportado com sucesso.'
-    );
+    alert('Arquivo CSV exportado com sucesso.');
 }
 
 
 /* =========================================================
-   21. COMPARTILHAMENTO NATIVO
+   20. COMPARTILHAMENTO & E-MAIL & COPIAR DADOS
    ========================================================= */
 
 async function shareData() {
-    const json =
-        createBackupJSON();
-
-    const blob =
-        new Blob(
-            [json],
-            { type: 'application/json' }
-        );
-
-    const date =
-        new Date()
-            .toISOString()
-            .slice(0, 10);
-
-    const filename =
-        `prazzo-backup-${date}.json`;
+    const json = createBackupJSON();
+    const blob = new Blob([json], { type: 'application/json' });
+    const date = new Date().toISOString().slice(0, 10);
+    const filename = `prazzo-backup-${date}.json`;
 
     try {
+        if (navigator.share && typeof File !== 'undefined') {
+            const file = new File([blob], filename, { type: 'application/json' });
 
-        if (
-            navigator.share &&
-            typeof File !== 'undefined'
-        ) {
-
-            const file =
-                new File(
-                    [blob],
-                    filename,
-                    {
-                        type: 'application/json'
-                    }
-                );
-
-            if (
-                !navigator.canShare ||
-                navigator.canShare({ files: [file] })
-            ) {
-
+            if (!navigator.canShare || navigator.canShare({ files: [file] })) {
                 await navigator.share({
                     title: 'Backup do Prazzo',
                     text: 'Backup dos dados do Prazzo.',
                     files: [file]
                 });
-
                 return;
             }
         }
 
         if (navigator.share) {
-
             await navigator.share({
                 title: 'Prazzo',
-                text:
-                    'Backup do Prazzo com ' +
-                    clientsDatabase.length +
-                    ' cliente(s).'
+                text: `Backup do Prazzo com ${clientsDatabase.length} cliente(s).`
             });
-
             return;
         }
 
-        alert(
-            'O compartilhamento nativo não é suportado neste navegador. Use a opção de Backup JSON.'
-        );
+        alert('O compartilhamento nativo não é suportado neste navegador. Use a opção de Backup JSON.');
 
     } catch (error) {
-
         if (error.name !== 'AbortError') {
-
-            console.error(
-                'Erro ao compartilhar:',
-                error
-            );
-
-            alert(
-                'Não foi possível compartilhar automaticamente.'
-            );
+            console.error('Erro ao compartilhar:', error);
+            alert('Não foi possível compartilhar automaticamente.');
         }
     }
 }
 
-
-/* =========================================================
-   22. PREPARAR E-MAIL
-   ========================================================= */
-
 function sendByEmail() {
-    const subject =
-        encodeURIComponent(
-            `Backup do Prazzo - ${new Date().toLocaleDateString('pt-BR')}`
-        );
+    const subject = encodeURIComponent(`Backup do Prazzo - ${new Date().toLocaleDateString('pt-BR')}`);
+    const body = encodeURIComponent(
+        `Olá,\n\nSegue o backup do sistema Prazzo.\n\nQuantidade de clientes: ${clientsDatabase.length}\n\nAtenciosamente,\n${userProfile.name || 'Usuário Prazzo'}\n${userProfile.oab || ''}`
+    );
 
-    const body =
-        encodeURIComponent(
-            `Olá,
-
-Segue o backup do sistema Prazzo.
-
-Quantidade de clientes: ${clientsDatabase.length}
-
-O arquivo JSON pode ser exportado pelo próprio sistema através da opção "Backup JSON".
-
-Atenciosamente,
-${userProfile.name || 'Usuário Prazzo'}
-${userProfile.oab || ''}`
-        );
-
-    window.location.href =
-        `mailto:?subject=${subject}&body=${body}`;
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
 }
 
-
-/* =========================================================
-   23. COPIAR DADOS
-   ========================================================= */
-
 async function copyDataToClipboard() {
-    const json =
-        createBackupJSON();
+    const json = createBackupJSON();
 
     try {
-
         await navigator.clipboard.writeText(json);
-
-        alert(
-            'Dados copiados para a área de transferência.'
-        );
-
+        alert('Dados copiados para a área de transferência.');
     } catch (error) {
-
-        console.error(
-            'Erro ao copiar:',
-            error
-        );
-
-        const textarea =
-            document.createElement('textarea');
-
+        console.error('Erro ao copiar via clipboard:', error);
+        const textarea = document.createElement('textarea');
         textarea.value = json;
-
         document.body.appendChild(textarea);
-
         textarea.select();
-
         document.execCommand('copy');
-
         textarea.remove();
-
-        alert(
-            'Dados copiados para a área de transferência.'
-        );
+        alert('Dados copiados para a área de transferência.');
     }
 }
 
 
 /* =========================================================
-   24. RELATÓRIO PARA IMPRESSÃO / PDF
+   21. RELATÓRIO PARA IMPRESSÃO / PDF
    ========================================================= */
 
 function printReport() {
-    const date =
-        new Date()
-            .toLocaleString('pt-BR');
+    const date = new Date().toLocaleString('pt-BR');
 
-    const rows =
-        clientsDatabase
-            .map(client => `
-                <tr>
-                    <td>${escapeHTML(client.code)}</td>
-                    <td>${escapeHTML(client.name)}</td>
-                    <td>${escapeHTML(client.cpf)}</td>
-                    <td>${escapeHTML(client.process)}</td>
-                    <td>${escapeHTML(client.type)}</td>
-                    <td>${escapeHTML(client.status)}</td>
-                    <td>${escapeHTML(client.fee)}</td>
-                </tr>
-            `)
-            .join('');
+    const rows = clientsDatabase.map(client => `
+        <tr>
+            <td>${escapeHTML(client.code)}</td>
+            <td>${escapeHTML(client.name)}</td>
+            <td>${escapeHTML(client.cpf)}</td>
+            <td>${escapeHTML(client.process)}</td>
+            <td>${escapeHTML(client.type)}</td>
+            <td>${escapeHTML(client.status)}</td>
+            <td>${escapeHTML(client.fee)}</td>
+        </tr>
+    `).join('');
 
     const report = `
         <!DOCTYPE html>
-
         <html lang="pt-BR">
-
         <head>
-
             <meta charset="UTF-8">
-
             <title>Relatório - Prazzo</title>
-
             <style>
-
-                * {
-                    box-sizing: border-box;
-                }
-
-                body {
-                    font-family: Arial, sans-serif;
-                    margin: 40px;
-                    color: #111827;
-                }
-
-                h1 {
-                    margin-bottom: 5px;
-                }
-
-                .subtitle {
-                    color: #64748b;
-                    margin-bottom: 25px;
-                }
-
-                .info {
-                    margin-bottom: 25px;
-                    line-height: 1.7;
-                }
-
-                table {
-                    width: 100%;
-                    border-collapse: collapse;
-                    font-size: 12px;
-                }
-
-                th,
-                td {
-                    border: 1px solid #d1d5db;
-                    padding: 8px;
-                    text-align: left;
-                }
-
-                th {
-                    background: #f1f5f9;
-                }
-
-                .footer {
-                    margin-top: 30px;
-                    font-size: 11px;
-                    color: #64748b;
-                }
-
+                * { box-sizing: border-box; }
+                body { font-family: Arial, sans-serif; margin: 40px; color: #111827; }
+                h1 { margin-bottom: 5px; }
+                .subtitle { color: #64748b; margin-bottom: 25px; }
+                .info { margin-bottom: 25px; line-height: 1.7; }
+                table { width: 100%; border-collapse: collapse; font-size: 12px; }
+                th, td { border: 1px solid #d1d5db; padding: 8px; text-align: left; }
+                th { background: #f1f5f9; }
+                .footer { margin-top: 30px; font-size: 11px; color: #64748b; }
                 @media print {
-
-                    body {
-                        margin: 20px;
-                    }
-
-                    button {
-                        display: none;
-                    }
-
+                    body { margin: 20px; }
                 }
-
             </style>
-
         </head>
-
         <body>
-
             <h1>Prazzo</h1>
-
-            <div class="subtitle">
-                Relatório de Gestão Jurídica
-            </div>
-
+            <div class="subtitle">Relatório de Gestão Jurídica</div>
             <div class="info">
-
-                <strong>Advogado:</strong>
-                ${escapeHTML(userProfile.name)}
-
-                <br>
-
-                <strong>OAB:</strong>
-                ${escapeHTML(userProfile.oab)}
-
-                <br>
-
-                <strong>Clientes cadastrados:</strong>
-                ${clientsDatabase.length}
-
-                <br>
-
-                <strong>Gerado em:</strong>
-                ${date}
-
+                <strong>Advogado:</strong> ${escapeHTML(userProfile.name)}<br>
+                <strong>OAB:</strong> ${escapeHTML(userProfile.oab)}<br>
+                <strong>Clientes cadastrados:</strong> ${clientsDatabase.length}<br>
+                <strong>Gerado em:</strong> ${date}
             </div>
-
             <table>
-
                 <thead>
-
                     <tr>
                         <th>Código</th>
                         <th>Cliente</th>
@@ -1511,45 +1032,23 @@ function printReport() {
                         <th>Status</th>
                         <th>Honorários</th>
                     </tr>
-
                 </thead>
-
                 <tbody>
-
                     ${rows}
-
                 </tbody>
-
             </table>
-
-            <div class="footer">
-                Documento gerado pelo sistema Prazzo.
-            </div>
-
+            <div class="footer">Documento gerado pelo sistema Prazzo.</div>
             <script>
-                window.onload = function() {
-                    window.print();
-                };
+                window.onload = function() { window.print(); };
             <\/script>
-
         </body>
-
         </html>
     `;
 
-    const reportWindow =
-        window.open(
-            '',
-            '_blank',
-            'width=1200,height=800'
-        );
+    const reportWindow = window.open('', '_blank', 'width=1200,height=800');
 
     if (!reportWindow) {
-
-        alert(
-            'O navegador bloqueou a janela de impressão. Permita pop-ups para o Prazzo.'
-        );
-
+        alert('O navegador bloqueou a janela de impressão. Permita pop-ups para o Prazzo.');
         return;
     }
 
@@ -1560,110 +1059,74 @@ function printReport() {
 
 
 /* =========================================================
-   25. IMPORTAR BACKUP
+   22. IMPORTAR BACKUP JSON
    ========================================================= */
 
-function setupImport() {
-    const input =
-        document.getElementById('importFile');
+function importJSON(event) {
+    const file = event.target.files[0];
+    if (!file) return;
 
-    if (!input) return;
+    const reader = new FileReader();
 
-    input.addEventListener('change', event => {
+    reader.onload = function(loadEvent) {
+        try {
+            const backup = JSON.parse(loadEvent.target.result);
 
-        const file =
-            event.target.files[0];
-
-        if (!file) return;
-
-        const reader =
-            new FileReader();
-
-        reader.onload = function(loadEvent) {
-
-            try {
-
-                const backup =
-                    JSON.parse(
-                        loadEvent.target.result
-                    );
-
-                if (
-                    !backup ||
-                    !Array.isArray(backup.clients)
-                ) {
-
-                    throw new Error(
-                        'Formato de backup inválido.'
-                    );
-                }
-
-                const confirmed =
-                    confirm(
-                        'Importar este backup substituirá os dados atuais deste dispositivo. Deseja continuar?'
-                    );
-
-                if (!confirmed) {
-                    input.value = '';
-                    return;
-                }
-
-                clientsDatabase =
-                    backup.clients;
-
-                if (
-                    backup.profile &&
-                    typeof backup.profile === 'object'
-                ) {
-
-                    userProfile = {
-                        ...defaultProfile,
-                        ...backup.profile
-                    };
-                }
-
-                saveData();
-                saveProfileData();
-
-                renderAll();
-                resetForm();
-
-                alert(
-                    `Backup importado com sucesso.\n\n${clientsDatabase.length} cliente(s) restaurado(s).`
-                );
-
-                closeExportModal();
-
-            } catch (error) {
-
-                console.error(
-                    'Erro ao importar backup:',
-                    error
-                );
-
-                alert(
-                    'Não foi possível importar o arquivo. Verifique se ele é um backup JSON válido do Prazzo.'
-                );
-
-            } finally {
-
-                input.value = '';
+            if (!backup || !Array.isArray(backup.clients)) {
+                throw new Error('Formato de backup inválido.');
             }
-        };
 
-        reader.readAsText(file);
-    });
+            const confirmed = confirm(
+                'Importar este backup substituirá os dados atuais deste dispositivo. Deseja continuar?'
+            );
+
+            if (!confirmed) {
+                event.target.value = '';
+                return;
+            }
+
+            clientsDatabase = backup.clients;
+
+            if (backup.profile && typeof backup.profile === 'object') {
+                userProfile = {
+                    ...defaultProfile,
+                    ...backup.profile
+                };
+            }
+
+            saveData();
+            saveProfileData();
+
+            renderAll();
+            resetForm();
+
+            alert(`Backup importado com sucesso.\n\n${clientsDatabase.length} cliente(s) restaurado(s).`);
+            closeExportModal();
+
+        } catch (error) {
+            console.error('Erro ao importar backup:', error);
+            alert('Não foi possível importar o arquivo. Verifique se ele é um backup JSON válido do Prazzo.');
+        } finally {
+            event.target.value = '';
+        }
+    };
+
+    reader.readAsText(file);
+}
+
+function setupImport() {
+    const input = document.getElementById('importFile');
+    if (!input) return;
+    input.addEventListener('change', importJSON);
 }
 
 
 /* =========================================================
-   26. FECHAR MODAIS CLICANDO FORA
+   23. FECHAR MODAIS CLICANDO FORA OU VIA TECLA ESC
    ========================================================= */
 
 function setupModalClosing() {
-
     document.addEventListener('click', event => {
-
         const modalIds = [
             'modalOverlay',
             'profileModalOverlay',
@@ -1671,50 +1134,34 @@ function setupModalClosing() {
         ];
 
         modalIds.forEach(id => {
-
-            const modal =
-                document.getElementById(id);
-
-            if (
-                modal &&
-                event.target === modal
-            ) {
+            const modal = document.getElementById(id);
+            if (modal && event.target === modal) {
                 modal.classList.remove('active');
             }
         });
     });
 
     document.addEventListener('keydown', event => {
+        if (event.key !== 'Escape') return;
 
-        if (event.key !== 'Escape') {
-            return;
-        }
-
-        document
-            .querySelectorAll('.modal-overlay.active')
-            .forEach(modal => {
-                modal.classList.remove('active');
-            });
+        document.querySelectorAll('.modal-overlay.active').forEach(modal => {
+            modal.classList.remove('active');
+        });
     });
 }
 
 
 /* =========================================================
-   27. INICIALIZAÇÃO
+   24. INICIALIZAÇÃO
    ========================================================= */
 
 document.addEventListener('DOMContentLoaded', () => {
-
     const hasSavedProfile = localStorage.getItem('jusgestao_perfil');
 
     renderAll();
-
     setupSearch();
-
     setupNewClientModal();
-
     setupImport();
-
     setupModalClosing();
 
     if (!hasSavedProfile) {
@@ -1722,5 +1169,4 @@ document.addEventListener('DOMContentLoaded', () => {
             openProfileModal();
         }, 500);
     }
-
 });
