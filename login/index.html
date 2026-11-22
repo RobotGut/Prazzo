@@ -3,86 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Criar Conta - JusGestão Pro</title>
+    <title>Bem-vindo ao Prazzo - Gestão Jurídica</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
-                <link
-            rel="shortcut icon"
-            href="../img/Favicoin_prazzo.png"
-            type="image/x-icon"
-        />
 </head>
-<body>
+<body class="login-page-body">
 
-    <main class="login-container">
-        <img src="" alt="">
-        <div class="login-banner">
-            <div class="brand">
-                <i class="fa-solid fa-scale-balanced"></i>
-                <span>JusGestão Pro</span>
-            </div>
-            <div class="banner-text">
-                <h2>Gestão jurídica moderna e integrada.</h2>
-                <p>Cadastre-se para acompanhar processos, gerenciar clientes e controlar seus prazos em um só lugar.</p>
-            </div>
-        </div>
-
+    <div class="login-container">
         <div class="login-card">
-            <div class="login-header">
-                <h1>Criar Nova Conta</h1>
-                <p>Preencha as informações do advogado responsável para acessar</p>
+            <div class="login-brand">
+                <i class="fa-solid fa-scale-balanced"></i>
+                <span>Prazzo</span>
             </div>
+            <h1>Gestão Jurídica Inteligente</h1>
+            <p class="login-subtitle">Organize os seus clientes, prazos, audiências e processos com total segurança e simplicidade.</p>
 
-            <form id="registerForm" onsubmit="handleRegister(event)">
+            <form id="loginForm" onsubmit="handleLogin(event)">
                 <div class="form-group">
-                    <label for="regName">Nome Completo *</label>
-                    <div class="input-icon-wrapper">
-                        <i class="fa-regular fa-user"></i>
-                        <input type="text" id="regName" class="form-control" placeholder="Ex: Dr. Ricardo Alves" required>
-                    </div>
+                    <label for="loginName">Como gostaria de ser chamado?</label>
+                    <input type="text" id="loginName" class="form-control" required placeholder="Ex: Dr. Ricardo Alves">
                 </div>
-
                 <div class="form-group">
-                    <label for="regOab">Número da OAB *</label>
-                    <div class="input-icon-wrapper">
-                        <i class="fa-solid fa-id-card"></i>
-                        <input type="text" id="regOab" class="form-control" placeholder="Ex: OAB/SP 452.890" required>
-                    </div>
+                    <label for="loginOab">Sua OAB (Opcional)</label>
+                    <input type="text" id="loginOab" class="form-control" placeholder="Ex: OAB/SP 452.890">
                 </div>
-
                 <div class="form-group">
-                    <label for="regPhone">Número de Telefone / WhatsApp *</label>
-                    <div class="input-icon-wrapper">
-                        <i class="fa-solid fa-phone"></i>
-                        <input type="text" id="regPhone" class="form-control" placeholder="(11) 99999-8888" required>
-                    </div>
+                    <label for="loginPassword">Senha de Acesso</label>
+                    <input type="password" id="loginPassword" class="form-control" required placeholder="Digite sua senha">
                 </div>
-
-                <div class="form-group">
-                    <label for="regEmail">E-mail Profissional *</label>
-                    <div class="input-icon-wrapper">
-                        <i class="fa-regular fa-envelope"></i>
-                        <input type="email" id="regEmail" class="form-control" placeholder="advogado@escritorio.com" required>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="regPassword">Senha *</label>
-                    <div class="input-icon-wrapper">
-                        <i class="fa-solid fa-lock"></i>
-                        <input type="password" id="regPassword" class="form-control" placeholder="••••••••" required>
-                    </div>
-                </div>
-
-                <button type="submit" class="btn btn-primary btn-block" style="margin-top: 10px;">
-                    Criar Conta e Acessar <i class="fa-solid fa-user-plus"></i>
+                <button type="submit" class="btn btn-primary btn-block" style="padding: 12px; margin-top: 6px;">
+                    <i class="fa-solid fa-arrow-right-to-bracket"></i> Acessar o Painel
                 </button>
             </form>
+
+            <div class="login-footer-links">
+                <button type="button" class="btn-link-text" onclick="openAboutModal()">
+                    <i class="fa-solid fa-circle-info"></i> Sobre o Prazzo
+                </button>
+            </div>
         </div>
-    </main>
+    </div>
+
+    <!-- Modal Sobre -->
+    <div class="modal-overlay" id="aboutModalOverlay" role="dialog" aria-modal="true">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Sobre o Prazzo</h3>
+                <button class="modal-close" onclick="closeAboutModal()" type="button">&times;</button>
+            </div>
+            <div class="modal-body-text">
+                <p>O <strong>Prazzo</strong> é um sistema moderno de gestão integrada para advogados e escritórios jurídicos.</p>
+                <p><i class="fa-solid fa-shield-halved" style="color: #2563eb; margin-right: 6px;"></i><strong>Privacidade:</strong> Todos os seus dados, clientes e prazos ficam salvos de forma segura e localmente no seu navegador.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeAboutModal()">Fechar</button>
+            </div>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>

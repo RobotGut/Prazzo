@@ -1,17 +1,23 @@
-function handleRegister(event) {
+function handleLogin(event) {
     event.preventDefault();
+    const name = document.getElementById('loginName').value.trim();
+    const oab = document.getElementById('loginOab').value.trim();
+    const password = document.getElementById('loginPassword').value;
 
-    // 1. Captura as 4 variáveis preenchidas no formulário
-    const userAccount = {
-        name: document.getElementById('regName').value,
-        oab: document.getElementById('regOab').value,
-        phone: document.getElementById('regPhone').value,
-        email: document.getElementById('regEmail').value
+    if (!name || !password) {
+        alert('Por favor, preencha o seu nome e a senha de acesso.');
+        return;
+    }
+
+    // Cria o perfil mantendo a senha digitada pelo usuário
+    const profile = {
+        name: name,
+        oab: oab ? oab : 'OAB Não Informada',
+        password: password // Salva exatamente a senha digitada aqui
     };
 
-    // 2. Salva no localStorage (disponibilizando para qualquer página do mesmo domínio)
-    localStorage.setItem('jusgestao_perfil', JSON.stringify(userAccount));
-
-    // 3. Redireciona para o painel principal
-    window.location.href = '../index.html';
+    localStorage.setItem('jusgestao_perfil', JSON.stringify(profile));
+    
+    // Redireciona para o painel principal (ajuste o caminho se necessário)
+    window.location.href = '../index.html'; 
 }

@@ -9,12 +9,14 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- FullCalendar CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet">
+    
     <link rel="stylesheet" href="style.css">
-    <link rel="shortcut icon" href="img/Favicoin2.png" type="image/x-icon">
 </head>
 <body>
 
-    <!-- Overlay para fechar a sidebar no mobile -->
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileSidebar()"></div>
 
     <!-- =========================================================
@@ -23,65 +25,72 @@
     <aside class="sidebar" id="sidebar">
         <div>
             <div class="brand">
-                <i class="fa-solid fa-scale-balanced"></i>
-                <span>Prazzo</span>
+                <div class="brand-title">
+                    <i class="fa-solid fa-scale-balanced"></i>
+                    <span>Prazzo</span>
+                </div>
                 <button class="mobile-close-btn" onclick="toggleMobileSidebar()" type="button">&times;</button>
             </div>
 
             <nav>
                 <ul class="nav-menu">
                     <li>
-                        <a class="nav-link active" onclick="switchTab('painel', this)">
-                            <i class="fa-solid fa-chart-pie"></i>
-                            Painel
+                        <a class="nav-link active" data-tab="painel" onclick="switchTab('painel', this)">
+                            <i class="fa-solid fa-chart-pie"></i> Painel
                         </a>
                     </li>
                     <li>
-                        <a class="nav-link" onclick="switchTab('clientes', this)">
-                            <i class="fa-solid fa-users"></i>
-                            Clientes
+                        <a class="nav-link" data-tab="clientes" onclick="switchTab('clientes', this)">
+                            <i class="fa-solid fa-users"></i> Clientes
                         </a>
                     </li>
                     <li>
-                        <a class="nav-link" onclick="switchTab('processos', this)">
-                            <i class="fa-solid fa-folder-open"></i>
-                            Processos
+                        <a class="nav-link" data-tab="processos" onclick="switchTab('processos', this)">
+                            <i class="fa-solid fa-folder-open"></i> Processos
                         </a>
                     </li>
                     <li>
-                        <a class="nav-link" onclick="switchTab('prazos', this)">
-                            <i class="fa-solid fa-calendar-days"></i>
-                            Prazos
+                        <a class="nav-link" data-tab="prazos" onclick="switchTab('prazos', this)">
+                            <i class="fa-solid fa-clock"></i> Prazos
                         </a>
                     </li>
                     <li>
-                        <a class="nav-link" onclick="switchTab('financeiro', this)">
-                            <i class="fa-solid fa-wallet"></i>
-                            Financeiro
+                        <a class="nav-link" data-tab="calendario" onclick="switchTab('calendario', this)">
+                            <i class="fa-solid fa-calendar-days"></i> Calendário
                         </a>
                     </li>
                     <li>
-                        <a class="nav-link" onclick="switchTab('documentos', this)">
-                            <i class="fa-solid fa-file-contract"></i>
-                            Documentos
+                        <a class="nav-link" data-tab="financeiro" onclick="switchTab('financeiro', this)">
+                            <i class="fa-solid fa-wallet"></i> Financeiro
+                        </a>
+                    </li>
+                    <li>
+                        <a class="nav-link" data-tab="documentos" onclick="switchTab('documentos', this)">
+                            <i class="fa-solid fa-file-contract"></i> Documentos
                         </a>
                     </li>
                     <li>
                         <a class="nav-link" onclick="openExportModal()">
-                            <i class="fa-solid fa-cloud-arrow-up"></i>
-                            Exportar / Compartilhar
+                            <i class="fa-solid fa-cloud-arrow-up"></i> Exportar / Backup
                         </a>
                     </li>
                 </ul>
             </nav>
         </div>
 
-        <div class="user-profile" id="btnOpenProfile" onclick="openProfileModal()" title="Clique para editar seu perfil">
-            <div class="avatar" id="sidebarAvatar">DR</div>
-            <div class="user-info">
-                <div class="name" id="sidebarName">Dr. Ricardo Alves</div>
-                <div class="role" id="sidebarOab">OAB/SP 452.890</div>
+        <div>
+            <!-- Perfil do Advogado -->
+            <div class="user-profile" id="btnOpenProfile" onclick="openProfileModal()" title="Editar seu perfil">
+                <div class="avatar" id="sidebarAvatar">DR</div>
+                <div class="user-info">
+                    <div class="name" id="sidebarName">Dr. Ricardo Alves</div>
+                    <div class="role" id="sidebarOab">OAB/SP 452.890</div>
+                </div>
             </div>
+            <!-- Botão Excluir Conta -->
+            <button class="btn-logout-sidebar" type="button" onclick="confirmDeleteAccount()" title="Apagar dados e reiniciar o sistema">
+                <i class="fa-solid fa-user-xmark"></i> Excluir Conta
+            </button>
         </div>
     </aside>
 
@@ -91,8 +100,7 @@
     <main>
         <header>
             <div class="header-left">
-                <!-- Botão de menu móvel -->
-                <button class="mobile-toggle-btn" onclick="toggleMobileSidebar()" type="button">
+                <button class="mobile-toggle-btn" onclick="toggleMobileSidebar()" type="button" aria-label="Abrir menu">
                     <i class="fa-solid fa-bars"></i>
                 </button>
                 <div class="header-title">
@@ -102,6 +110,10 @@
             </div>
 
             <div class="header-actions">
+                <button class="btn btn-secondary btn-theme-header" type="button" onclick="toggleDarkMode()" title="Alternar Modo Escuro / Claro">
+                    <i class="fa-solid fa-moon" id="themeIcon"></i>
+                    <span id="themeText">Modo Escuro</span>
+                </button>
                 <button class="btn btn-secondary" type="button" onclick="openExportModal()">
                     <i class="fa-solid fa-share-nodes"></i>
                     <span>Exportar</span>
@@ -124,7 +136,7 @@
                 <div id="suggestionsList" class="suggestions-list" role="listbox"></div>
             </div>
 
-            <form id="clientForm" onsubmit="event.preventDefault();">
+            <form id="clientForm" onsubmit="saveEditedClient(event)">
                 <div class="details-grid">
                     <article class="card">
                         <div class="card-title">
@@ -165,10 +177,12 @@
                             <input type="text" id="fieldCourt" class="form-control" placeholder="Ex: 3ª Vara Cível de São Paulo">
                         </div>
                         <div class="form-group">
-                            <label>Status Processual</label>
-                            <div id="statusBadgeContainer">
-                                <span class="badge badge-pending" id="fieldStatus">Aguardando Seleção</span>
-                            </div>
+                            <label for="fieldStatusSelect">Status Processual</label>
+                            <select id="fieldStatusSelect" class="form-control">
+                                <option value="Em Andamento">Em Andamento</option>
+                                <option value="Aguardando Prazo">Aguardando Prazo</option>
+                                <option value="Encerrado">Encerrado</option>
+                            </select>
                         </div>
                     </article>
 
@@ -186,11 +200,14 @@
                         </div>
                         <div class="form-group">
                             <label for="fieldDeadline">Próximo Prazo / Audiência</label>
-                            <input type="text" id="fieldDeadline" class="form-control" placeholder="Data e Descrição">
+                            <input type="text" id="fieldDeadline" class="form-control" placeholder="DD/MM/AAAA - Descrição">
                         </div>
-                        <div class="form-group" style="margin-top:18px;">
-                            <button type="button" class="btn btn-secondary btn-block" onclick="resetForm()">
-                                <i class="fa-solid fa-eraser"></i> Limpar Ficha
+                        <div class="form-group" style="margin-top:18px; display:flex; gap:10px;">
+                            <button type="submit" class="btn btn-primary" style="flex:1; justify-content:center;">
+                                <i class="fa-solid fa-floppy-disk"></i> Salvar Alterações
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="resetForm()" title="Limpar Ficha">
+                                <i class="fa-solid fa-eraser"></i>
                             </button>
                         </div>
                     </article>
@@ -221,9 +238,14 @@
 
         <!-- ABA CLIENTES -->
         <section id="tab-clientes" class="tab-content">
+            <div class="filter-tabs-bar">
+                <button type="button" class="filter-tab-btn active" onclick="setClientsFilter('ativos', this)">Ativos / Em Andamento</button>
+                <button type="button" class="filter-tab-btn" onclick="setClientsFilter('encerrados', this)">Já Finalizados / Encerrados</button>
+                <button type="button" class="filter-tab-btn" onclick="setClientsFilter('todos', this)">Todos os Clientes</button>
+            </div>
             <section class="card table-card">
                 <div class="section-header">
-                    <h2>Base Completa de Clientes Cadastrados</h2>
+                    <h2 id="clientsTableTitle">Base de Clientes Ativos</h2>
                 </div>
                 <div class="table-responsive">
                     <table class="data-table">
@@ -235,6 +257,7 @@
                                 <th>Idade</th>
                                 <th>Telefone</th>
                                 <th>E-mail</th>
+                                <th>Status</th>
                                 <th style="text-align:center;">Ações</th>
                             </tr>
                         </thead>
@@ -246,9 +269,14 @@
 
         <!-- ABA PROCESSOS -->
         <section id="tab-processos" class="tab-content">
+            <div class="filter-tabs-bar">
+                <button type="button" class="filter-tab-btn active" onclick="setProcessesFilter('ativos', this)">Processos em Andamento</button>
+                <button type="button" class="filter-tab-btn" onclick="setProcessesFilter('encerrados', this)">Processos Finalizados</button>
+                <button type="button" class="filter-tab-btn" onclick="setProcessesFilter('todos', this)">Todos os Processos</button>
+            </div>
             <section class="card table-card">
                 <div class="section-header">
-                    <h2>Andamento de Processos Ativos</h2>
+                    <h2 id="processesTableTitle">Andamento de Processos Ativos</h2>
                 </div>
                 <div class="table-responsive">
                     <table class="data-table">
@@ -269,10 +297,30 @@
 
         <!-- ABA PRAZOS -->
         <section id="tab-prazos" class="tab-content">
-            <div class="section-header">
+            <div class="section-header section-header-box">
                 <h2>Próximas Audiências e Prazos Processuais</h2>
+                <button class="btn btn-primary" type="button" onclick="openEventModal()">
+                    <i class="fa-solid fa-plus"></i> Novo Compromisso
+                </button>
             </div>
             <div class="timeline" id="deadlinesContainer"></div>
+        </section>
+
+        <!-- ABA CALENDÁRIO -->
+        <section id="tab-calendario" class="tab-content">
+            <div class="section-header section-header-box">
+                <div>
+                    <h2>Calendário de Audiências, Reuniões e Prazos</h2>
+                    <p style="color:var(--text-muted); font-size:0.85rem; margin-top:4px;">Clique em qualquer dia no calendário para agendar um compromisso.</p>
+                </div>
+                <button class="btn btn-primary" type="button" onclick="openEventModal()">
+                    <i class="fa-solid fa-calendar-plus"></i> Adicionar Data / Evento
+                </button>
+            </div>
+            
+            <div class="card">
+                <div id="calendar"></div>
+            </div>
         </section>
 
         <!-- ABA FINANCEIRO -->
@@ -332,7 +380,7 @@
                     <div class="card-title">
                         <i class="fa-solid fa-file-pdf"></i> Procuração Ad Judicia
                     </div>
-                    <p class="text-muted">Modelo padrão para prestação de serviços jurídicos.</p>
+                    <p style="color:var(--text-muted); font-size:0.88rem; margin-bottom:14px;">Modelo padrão para prestação de serviços jurídicos.</p>
                     <button class="btn btn-secondary" onclick="alert('Você poderá adicionar seu modelo de procuração aqui.')">
                         <i class="fa-solid fa-download"></i> Baixar Modelo
                     </button>
@@ -341,7 +389,7 @@
                     <div class="card-title">
                         <i class="fa-solid fa-file-word"></i> Contrato de Honorários
                     </div>
-                    <p class="text-muted">Minuta para prestação de serviços jurídicos.</p>
+                    <p style="color:var(--text-muted); font-size:0.88rem; margin-bottom:14px;">Minuta para prestação de serviços jurídicos.</p>
                     <button class="btn btn-secondary" onclick="alert('Você poderá adicionar seu modelo de contrato aqui.')">
                         <i class="fa-solid fa-download"></i> Baixar Modelo
                     </button>
@@ -350,7 +398,7 @@
                     <div class="card-title">
                         <i class="fa-solid fa-file-lines"></i> Declaração de Hipossuficiência
                     </div>
-                    <p class="text-muted">Modelo de declaração para Justiça Gratuita.</p>
+                    <p style="color:var(--text-muted); font-size:0.88rem; margin-bottom:14px;">Modelo de declaração para Justiça Gratuita.</p>
                     <button class="btn btn-secondary" onclick="alert('Você poderá adicionar seu modelo aqui.')">
                         <i class="fa-solid fa-download"></i> Baixar Modelo
                     </button>
@@ -359,7 +407,7 @@
         </section>
     </main>
 
-    <!-- MODAL NOVO CLIENTE -->
+    <!-- MODAIS -->
     <div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true">
         <div class="modal">
             <div class="modal-header">
@@ -401,6 +449,14 @@
                         <input type="text" id="newFormCourt" class="form-control" placeholder="Ex: 1ª Vara Cível">
                     </div>
                     <div class="form-group">
+                        <label for="newFormDeadlineDate">Data do Próximo Prazo / Audiência</label>
+                        <input type="date" id="newFormDeadlineDate" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="newFormDeadlineDesc">Descrição do Compromisso</label>
+                        <input type="text" id="newFormDeadlineDesc" class="form-control" placeholder="Ex: Audiência de Conciliação">
+                    </div>
+                    <div class="form-group">
                         <label for="newFormStatus">Status Inicial</label>
                         <select id="newFormStatus" class="form-control">
                             <option value="Em Andamento">Em Andamento</option>
@@ -421,11 +477,134 @@
         </div>
     </div>
 
+    <!-- MODAL EDITAR CLIENTE -->
+    <div class="modal-overlay" id="editClientModalOverlay" role="dialog" aria-modal="true">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Editar Dados do Cliente</h3>
+                <button class="modal-close" onclick="closeEditClientModal()" type="button">&times;</button>
+            </div>
+            <form id="editClientModalForm" onsubmit="submitEditClientModal(event)">
+                <input type="hidden" id="editModalCode">
+                <div class="modal-grid">
+                    <div class="form-group">
+                        <label for="editModalName">Nome Completo *</label>
+                        <input type="text" id="editModalName" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editModalCpf">CPF *</label>
+                        <input type="text" id="editModalCpf" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editModalAge">Idade / Nascimento *</label>
+                        <input type="text" id="editModalAge" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editModalPhone">Telefone *</label>
+                        <input type="text" id="editModalPhone" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editModalEmail">E-mail</label>
+                        <input type="email" id="editModalEmail" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="editModalProcess">Número do Processo</label>
+                        <input type="text" id="editModalProcess" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="editModalType">Tipo de Ação</label>
+                        <input type="text" id="editModalType" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="editModalCourt">Vara / Tribunal</label>
+                        <input type="text" id="editModalCourt" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="editModalStatus">Status</label>
+                        <select id="editModalStatus" class="form-control">
+                            <option value="Em Andamento">Em Andamento</option>
+                            <option value="Aguardando Prazo">Aguardando Prazo</option>
+                            <option value="Encerrado">Encerrado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editModalDeadline">Próximo Prazo / Audiência</label>
+                        <input type="text" id="editModalDeadline" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="editModalFee">Honorários</label>
+                        <input type="text" id="editModalFee" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="editModalFeeStatus">Status Honorários</label>
+                        <select id="editModalFeeStatus" class="form-control">
+                            <option value="Pendente">Pendente</option>
+                            <option value="Recebido">Recebido</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditClientModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-check"></i> Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL ADICIONAR COMPROMISSO -->
+    <div class="modal-overlay" id="eventModalOverlay" role="dialog" aria-modal="true">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Agendar Compromisso</h3>
+                <button class="modal-close" onclick="closeEventModal()" type="button">&times;</button>
+            </div>
+            <form id="newEventForm" onsubmit="saveNewEvent(event)">
+                <div class="modal-grid">
+                    <div class="form-group">
+                        <label for="eventTitle">Título *</label>
+                        <input type="text" id="eventTitle" class="form-control" required placeholder="Ex: Audiência Trabalhista">
+                    </div>
+                    <div class="form-group">
+                        <label for="eventType">Categoria *</label>
+                        <select id="eventType" class="form-control">
+                            <option value="Audiência">Audiência</option>
+                            <option value="Reunião">Reunião</option>
+                            <option value="Prazo Processual">Prazo Processual</option>
+                            <option value="Outro">Outro</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="eventDate">Data *</label>
+                        <input type="date" id="eventDate" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="eventTime">Horário</label>
+                        <input type="time" id="eventTime" class="form-control">
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label for="eventClientSelect">Vincular Cliente</label>
+                        <select id="eventClientSelect" class="form-control">
+                            <option value="">-- Avulso / Escritório --</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label for="eventNotes">Observações</label>
+                        <input type="text" id="eventNotes" class="form-control" placeholder="Local ou Link">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeEventModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-calendar-check"></i> Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- MODAL PERFIL -->
     <div class="modal-overlay" id="profileModalOverlay" role="dialog" aria-modal="true">
         <div class="modal">
             <div class="modal-header">
-                <h3>Minha Conta / Perfil do Advogado</h3>
+                <h3>Perfil do Advogado</h3>
                 <button class="modal-close" onclick="closeProfileModal()" type="button">&times;</button>
             </div>
             <form id="profileForm" onsubmit="saveProfile(event)">
@@ -439,17 +618,17 @@
                         <input type="text" id="profileOab" class="form-control" required>
                     </div>
                     <div class="form-group">
-                        <label for="profileEmail">E-mail Profissional</label>
+                        <label for="profileEmail">E-mail</label>
                         <input type="email" id="profileEmail" class="form-control">
                     </div>
                     <div class="form-group">
-                        <label for="profilePhone">Telefone de Contato</label>
+                        <label for="profilePhone">Telefone</label>
                         <input type="text" id="profilePhone" class="form-control">
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closeProfileModal()">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
                 </div>
             </form>
         </div>
@@ -463,7 +642,7 @@
                 <button class="modal-close" onclick="closeExportModal()" type="button">&times;</button>
             </div>
             <p style="color:var(--text-muted);font-size:0.9rem;line-height:1.5;margin-bottom:20px;">
-                Escolha como deseja guardar, enviar ou compartilhar os dados do Prazzo. Seus dados continuam armazenados localmente neste dispositivo.
+                Guarde ou envie os seus dados com segurança. Os dados ficam salvos no armazenamento local deste dispositivo.
             </p>
             <div class="export-grid">
                 <button class="btn btn-secondary" type="button" onclick="exportData()">
@@ -473,26 +652,24 @@
                     <i class="fa-solid fa-file-csv"></i> Exportar CSV
                 </button>
                 <button class="btn btn-secondary" type="button" onclick="shareData()">
-                    <i class="fa-solid fa-share-nodes"></i> Compartilhar
+                    <i class="fa-solid fa-share-nodes"></i> Partilhar
                 </button>
                 <button class="btn btn-secondary" type="button" onclick="sendByEmail()">
-                    <i class="fa-solid fa-envelope"></i> Preparar E-mail
+                    <i class="fa-solid fa-envelope"></i> E-mail
                 </button>
                 <button class="btn btn-secondary" type="button" onclick="copyDataToClipboard()">
                     <i class="fa-solid fa-copy"></i> Copiar Dados
                 </button>
-                <button class="btn btn-secondary" type="button" onclick="window.print()">
+                <button class="btn btn-secondary" type="button" onclick="printReport()">
                     <i class="fa-solid fa-print"></i> Imprimir / PDF
                 </button>
             </div>
 
-            <div style="margin-top:20px;padding:14px;background:#f8fafc;border:1px solid var(--border-color);border-radius:8px;">
+            <div class="import-box">
                 <strong style="font-size:0.85rem;">Importar backup</strong>
-                <p style="font-size:0.78rem;color:var(--text-muted);margin:5px 0 12px;">
-                    Use um arquivo JSON exportado anteriormente para recuperar seus dados.
-                </p>
+                <p style="font-size:0.78rem;color:var(--text-muted);margin:5px 0 12px;">Restaurar dados de um arquivo JSON salvo anteriormente.</p>
                 <button class="btn btn-primary" type="button" onclick="document.getElementById('importFile').click()">
-                    <i class="fa-solid fa-file-import"></i> Importar 
+                    <i class="fa-solid fa-file-import"></i> Selecionar Arquivo
                 </button>
                 <input type="file" id="importFile" accept=".json,application/json" style="display:none;" onchange="importJSON(event)">
             </div>
@@ -502,6 +679,10 @@
             </div>
         </div>
     </div>
+
+    <!-- FullCalendar JS -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/locales/pt-br.global.min.js"></script>
 
     <script src="script.js"></script>
 </body>

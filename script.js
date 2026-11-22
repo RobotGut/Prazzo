@@ -1,6 +1,6 @@
 /* =========================================================
    PRAZZO - SISTEMA DE GESTÃO JURÍDICA
-   Dados locais + Importação + Exportação + Compartilhamento
+   Dados locais + Prazos + Calendário + Edição + Modo Escuro
    ========================================================= */
 
 /* =========================================================
@@ -19,7 +19,7 @@ const defaultDatabase = [
         status: 'Em Andamento',
         phone: '(11) 98765-4321',
         email: 'maria.silva@email.com',
-        deadline: '18/10/2026 - Contestação',
+        deadline: '18/11/2026 - Contestação',
         fee: 'R$ 5.000,00',
         feeStatus: 'Recebido'
     },
@@ -34,9 +34,22 @@ const defaultDatabase = [
         status: 'Aguardando Prazo',
         phone: '(11) 91234-5678',
         email: 'joao.santos@email.com',
-        deadline: '25/10/2026 - Réplica',
+        deadline: '25/11/2026 - Réplica',
         fee: 'R$ 8.500,00',
         feeStatus: 'Pendente'
+    }
+];
+
+const defaultEvents = [
+    {
+        id: 'EVT-1001',
+        title: 'Reunião de Alinhamento Interno',
+        category: 'Reunião',
+        date: '2026-11-20',
+        time: '14:00',
+        clientCode: '',
+        clientName: 'Escritório',
+        notes: 'Sala de reuniões principal'
     }
 ];
 
@@ -49,73 +62,68 @@ const defaultProfile = {
 
 
 /* =========================================================
-   2. CARREGAMENTO DOS DADOS
+   2. CARREGAMENTO E SALVAMENTO DOS DADOS
    ========================================================= */
 
 function loadClients() {
     try {
         const saved = localStorage.getItem('jusgestao_clientes');
-
-        if (!saved) {
-            return [...defaultDatabase];
-        }
-
+        if (!saved) return [...defaultDatabase];
         const parsed = JSON.parse(saved);
-
-        return Array.isArray(parsed)
-            ? parsed
-            : [...defaultDatabase];
-
+        return Array.isArray(parsed) ? parsed : [...defaultDatabase];
     } catch (error) {
         console.error('Erro ao carregar clientes:', error);
         return [...defaultDatabase];
     }
 }
 
+function loadCustomEvents() {
+    try {
+        const saved = localStorage.getItem('jusgestao_eventos');
+        if (!saved) return [...defaultEvents];
+        const parsed = JSON.parse(saved);
+        return Array.isArray(parsed) ? parsed : [...defaultEvents];
+    } catch (error) {
+        console.error('Erro ao carregar eventos:', error);
+        return [...defaultEvents];
+    }
+}
+
 function loadProfile() {
     const savedProfile = localStorage.getItem('jusgestao_perfil');
-
     if (savedProfile) {
         try {
-            return {
-                ...defaultProfile,
-                ...JSON.parse(savedProfile)
-            };
+            return { ...defaultProfile, ...JSON.parse(savedProfile) };
         } catch (error) {
             console.error('Erro ao carregar perfil:', error);
             return { ...defaultProfile };
         }
-    } else {
-        return {
-            name: 'Dr. Ricardo Alves',
-            oab: 'OAB/SP 452.890',
-            phone: '',
-            email: ''
-        };
     }
+    return { ...defaultProfile };
 }
 
 let clientsDatabase = loadClients();
+let customEventsDatabase = loadCustomEvents();
 let userProfile = loadProfile();
 
+let currentClientsFilter = 'ativos';
+let currentProcessesFilter = 'ativos';
 
 function saveData() {
-    localStorage.setItem(
-        'jusgestao_clientes',
-        JSON.stringify(clientsDatabase)
-    );
+    localStorage.setItem('jusgestao_clientes', JSON.stringify(clientsDatabase));
+}
+
+function saveCustomEvents() {
+    localStorage.setItem('jusgestao_eventos', JSON.stringify(customEventsDatabase));
 }
 
 function saveProfileData() {
-    localStorage.setItem(
-        'jusgestao_perfil',
-        JSON.stringify(userProfile)
-    );
+    localStorage.setItem('jusgestao_perfil', JSON.stringify(userProfile));
 }
 
 
 /* =========================================================
-   3. PERFIL
+   3. PERFIL DO ADVOGADO & MODO ESCURO
    ========================================================= */
 
 function renderProfile() {
@@ -123,13 +131,8 @@ function renderProfile() {
     const sidebarOab = document.getElementById('sidebarOab');
     const sidebarAvatar = document.getElementById('sidebarAvatar');
 
-    if (sidebarName) {
-        sidebarName.textContent = userProfile.name || 'Advogado';
-    }
-
-    if (sidebarOab) {
-        sidebarOab.textContent = userProfile.oab || 'OAB Pendente';
-    }
+    if (sidebarName) sidebarName.textContent = userProfile.name || 'Advogado';
+    if (sidebarOab) sidebarOab.textContent = userProfile.oab || 'OAB Pendente';
 
     if (sidebarAvatar && userProfile.name) {
         const initials = userProfile.name
@@ -139,59 +142,83 @@ function renderProfile() {
             .join('')
             .slice(0, 2)
             .toUpperCase();
-
         sidebarAvatar.textContent = initials || 'DR';
     }
 }
 
 function openProfileModal() {
     const modal = document.getElementById('profileModalOverlay');
-
     if (!modal) return;
 
-    document.getElementById('profileName').value =
-        userProfile.name || '';
-
-    document.getElementById('profileOab').value =
-        userProfile.oab || '';
-
-    document.getElementById('profilePhone').value =
-        userProfile.phone || '';
-
-    document.getElementById('profileEmail').value =
-        userProfile.email || '';
+    document.getElementById('profileName').value = userProfile.name || '';
+    document.getElementById('profileOab').value = userProfile.oab || '';
+    document.getElementById('profilePhone').value = userProfile.phone || '';
+    document.getElementById('profileEmail').value = userProfile.email || '';
 
     modal.classList.add('active');
 }
 
 function closeProfileModal() {
     const modal = document.getElementById('profileModalOverlay');
-
-    if (modal) {
-        modal.classList.remove('active');
-    }
+    if (modal) modal.classList.remove('active');
 }
 
 function saveProfile(event) {
     event.preventDefault();
 
-    userProfile.name =
-        document.getElementById('profileName').value.trim();
-
-    userProfile.oab =
-        document.getElementById('profileOab').value.trim();
-
-    userProfile.phone =
-        document.getElementById('profilePhone').value.trim();
-
-    userProfile.email =
-        document.getElementById('profileEmail').value.trim();
+    userProfile.name = document.getElementById('profileName').value.trim();
+    userProfile.oab = document.getElementById('profileOab').value.trim();
+    userProfile.phone = document.getElementById('profilePhone').value.trim();
+    userProfile.email = document.getElementById('profileEmail').value.trim();
 
     saveProfileData();
     renderProfile();
     closeProfileModal();
-
     alert('Perfil atualizado com sucesso.');
+}
+
+function initDarkMode() {
+    const savedTheme = localStorage.getItem('prazzo_theme');
+    const isDark = savedTheme === 'dark';
+
+    if (isDark) {
+        document.body.classList.add('dark-mode');
+        updateThemeButtonUI(true);
+    } else {
+        document.body.classList.remove('dark-mode');
+        updateThemeButtonUI(false);
+    }
+}
+
+function toggleDarkMode() {
+    const isDark = document.body.classList.toggle('dark-mode');
+    
+    if (isDark) {
+        localStorage.setItem('prazzo_theme', 'dark');
+        updateThemeButtonUI(true);
+    } else {
+        localStorage.setItem('prazzo_theme', 'light');
+        updateThemeButtonUI(false);
+    }
+
+    if (calendarInstance) {
+        setTimeout(() => calendarInstance.render(), 50);
+    }
+}
+
+function updateThemeButtonUI(isDark) {
+    const icon = document.getElementById('themeIcon');
+    const text = document.getElementById('themeText');
+
+    if (icon && text) {
+        if (isDark) {
+            icon.className = 'fa-solid fa-sun';
+            text.textContent = 'Modo Claro';
+        } else {
+            icon.className = 'fa-solid fa-moon';
+            text.textContent = 'Modo Escuro';
+        }
+    }
 }
 
 
@@ -206,15 +233,19 @@ const pageTitles = {
     },
     clientes: {
         title: 'Base Completa de Clientes',
-        sub: 'Gerenciamento e histórico dos clientes cadastrados.'
+        sub: 'Gerenciamento e histórico dos clientes cadastrados por status.'
     },
     processos: {
         title: 'Andamento de Processos',
-        sub: 'Status, varas e acompanhamento de ações judiciais.'
+        sub: 'Status, varas e acompanhamento de ações judiciais ativas e encerradas.'
     },
     prazos: {
         title: 'Controle de Prazos e Audiências',
         sub: 'Próximos compromissos e audiências agendadas.'
+    },
+    calendario: {
+        title: 'Calendário de Compromissos',
+        sub: 'Visualize e agende audiências, reuniões e prazos no calendário.'
     },
     financeiro: {
         title: 'Gestão Financeira & Honorários',
@@ -227,38 +258,36 @@ const pageTitles = {
 };
 
 function switchTab(tabId, element) {
-    document
-        .querySelectorAll('.nav-link')
-        .forEach(nav => nav.classList.remove('active'));
+    document.querySelectorAll('.nav-link').forEach(nav => nav.classList.remove('active'));
 
     if (element) {
         element.classList.add('active');
+    } else {
+        const autoLink = document.querySelector(`.nav-link[data-tab="${tabId}"]`);
+        if (autoLink) autoLink.classList.add('active');
     }
 
-    document
-        .querySelectorAll('.tab-content')
-        .forEach(tab => tab.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
 
     const targetTab = document.getElementById(`tab-${tabId}`);
-
-    if (targetTab) {
-        targetTab.classList.add('active');
-    }
+    if (targetTab) targetTab.classList.add('active');
 
     if (pageTitles[tabId]) {
         const title = document.getElementById('pageTitle');
         const subtitle = document.getElementById('pageSubtitle');
-
-        if (title) {
-            title.textContent = pageTitles[tabId].title;
-        }
-
-        if (subtitle) {
-            subtitle.textContent = pageTitles[tabId].sub;
-        }
+        if (title) title.textContent = pageTitles[tabId].title;
+        if (subtitle) subtitle.textContent = pageTitles[tabId].sub;
     }
 
-    // Fecha a sidebar automaticamente ao clicar em um item no mobile
+    if (tabId === 'calendario') {
+        setTimeout(() => {
+            if (calendarInstance) {
+                calendarInstance.render();
+                calendarInstance.updateSize();
+            }
+        }, 80);
+    }
+
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('sidebarOverlay');
     if (sidebar && sidebar.classList.contains('mobile-open')) {
@@ -270,18 +299,13 @@ function switchTab(tabId, element) {
 function toggleMobileSidebar() {
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('sidebarOverlay');
-
-    if (sidebar) {
-        sidebar.classList.toggle('mobile-open');
-    }
-    if (overlay) {
-        overlay.classList.toggle('active');
-    }
+    if (sidebar) sidebar.classList.toggle('mobile-open');
+    if (overlay) overlay.classList.toggle('active');
 }
 
 
 /* =========================================================
-   5. SEGURANÇA PARA HTML
+   5. SEGURANÇA PARA HTML & UTILS
    ========================================================= */
 
 function escapeHTML(value) {
@@ -293,32 +317,28 @@ function escapeHTML(value) {
         .replace(/'/g, '&#039;');
 }
 
-
-/* =========================================================
-   6. BADGES
-   ========================================================= */
-
 function getBadgeClass(status) {
-    if (
-        status === 'Em Andamento' ||
-        status === 'Recebido'
-    ) {
-        return 'badge-active';
-    }
-
-    if (
-        status === 'Aguardando Prazo' ||
-        status === 'Pendente'
-    ) {
-        return 'badge-pending';
-    }
-
+    if (status === 'Em Andamento' || status === 'Recebido') return 'badge-active';
+    if (status === 'Aguardando Prazo' || status === 'Pendente') return 'badge-pending';
     return 'badge-closed';
+}
+
+function formatIsoToBrDate(isoDate) {
+    if (!isoDate || !isoDate.includes('-')) return isoDate;
+    const [year, month, day] = isoDate.split('-');
+    return `${day}/${month}/${year}`;
+}
+
+function parseBrDateToIso(brDate) {
+    if (!brDate) return null;
+    const match = brDate.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+    if (!match) return null;
+    return `${match[3]}-${match[2]}-${match[1]}`;
 }
 
 
 /* =========================================================
-   7. RENDERIZAÇÃO GERAL
+   6. RENDERIZAÇÃO GERAL
    ========================================================= */
 
 function renderAll() {
@@ -326,6 +346,7 @@ function renderAll() {
     renderClientsTable();
     renderProcessesTable();
     renderDeadlines();
+    renderCalendar();
     renderFinancialTable();
     updateFinancialSummary();
     renderProfile();
@@ -333,59 +354,81 @@ function renderAll() {
 
 
 /* =========================================================
-   8. TABELA DO PAINEL
+   7. TABELA DO PAINEL
    ========================================================= */
 
 function renderDashboardTable() {
-    document
-        .querySelectorAll('.clientsTableBody')
-        .forEach(tbody => {
+    document.querySelectorAll('.clientsTableBody').forEach(tbody => {
+        tbody.innerHTML = '';
 
-            tbody.innerHTML = '';
+        clientsDatabase.forEach(client => {
+            const tr = document.createElement('tr');
+            tr.style.cursor = 'pointer';
 
-            clientsDatabase.forEach(client => {
-
-                const tr = document.createElement('tr');
-                tr.style.cursor = 'pointer';
-
-                tr.addEventListener('click', () => {
-                    const painelLink = document.querySelector('.nav-link');
-                    switchTab('painel', painelLink);
-                    fillFormWithClient(client);
-                });
-
-                tr.innerHTML = `
-                    <td><strong>${escapeHTML(client.code)}</strong></td>
-                    <td>${escapeHTML(client.name)}</td>
-                    <td>${escapeHTML(client.cpf)}</td>
-                    <td>${escapeHTML(client.process)}</td>
-                    <td>${escapeHTML(client.court)}</td>
-                    <td>
-                        <span class="badge ${getBadgeClass(client.status)}">
-                            ${escapeHTML(client.status)}
-                        </span>
-                    </td>
-                `;
-
-                tbody.appendChild(tr);
+            tr.addEventListener('click', () => {
+                switchTab('painel');
+                fillFormWithClient(client);
             });
+
+            tr.innerHTML = `
+                <td><strong>${escapeHTML(client.code)}</strong></td>
+                <td>${escapeHTML(client.name)}</td>
+                <td>${escapeHTML(client.cpf)}</td>
+                <td>${escapeHTML(client.process)}</td>
+                <td>${escapeHTML(client.court)}</td>
+                <td>
+                    <span class="badge ${getBadgeClass(client.status)}">
+                        ${escapeHTML(client.status)}
+                    </span>
+                </td>
+            `;
+
+            tbody.appendChild(tr);
         });
+    });
 }
 
 
 /* =========================================================
-   9. TABELA DE CLIENTES
+   8. ABA CLIENTES & FILTROS (ATIVOS / ENCERRADOS)
    ========================================================= */
+
+function setClientsFilter(filter, btnElement) {
+    currentClientsFilter = filter;
+    
+    const parentBar = btnElement.closest('.filter-tabs-bar');
+    if (parentBar) {
+        parentBar.querySelectorAll('.filter-tab-btn').forEach(b => b.classList.remove('active'));
+    }
+    btnElement.classList.add('active');
+
+    renderClientsTable();
+}
 
 function renderClientsTable() {
     const body = document.getElementById('fullClientsTableBody');
-
+    const titleEl = document.getElementById('clientsTableTitle');
     if (!body) return;
 
     body.innerHTML = '';
 
-    clientsDatabase.forEach(client => {
+    let filtered = clientsDatabase;
+    if (currentClientsFilter === 'ativos') {
+        filtered = clientsDatabase.filter(c => c.status !== 'Encerrado');
+        if (titleEl) titleEl.textContent = 'Base de Clientes Ativos';
+    } else if (currentClientsFilter === 'encerrados') {
+        filtered = clientsDatabase.filter(c => c.status === 'Encerrado');
+        if (titleEl) titleEl.textContent = 'Clientes com Processos Finalizados';
+    } else {
+        if (titleEl) titleEl.textContent = 'Todos os Clientes Cadastrados';
+    }
 
+    if (filtered.length === 0) {
+        body.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--text-muted); padding:30px;">Nenhum cliente encontrado nesta categoria.</td></tr>`;
+        return;
+    }
+
+    filtered.forEach(client => {
         const tr = document.createElement('tr');
 
         tr.innerHTML = `
@@ -395,20 +438,25 @@ function renderClientsTable() {
             <td>${escapeHTML(client.age)}</td>
             <td>${escapeHTML(client.phone)}</td>
             <td>${escapeHTML(client.email)}</td>
+            <td>
+                <span class="badge ${getBadgeClass(client.status)}">
+                    ${escapeHTML(client.status)}
+                </span>
+            </td>
             <td style="text-align:center;">
                 <button
                     type="button"
-                    onclick="editClient('${escapeHTML(client.code)}')"
-                    style="background:none;border:none;color:var(--accent);cursor:pointer;margin-right:12px;"
-                    title="Editar"
+                    onclick="openEditClientModal('${escapeHTML(client.code)}')"
+                    style="background:none;border:none;color:var(--accent);cursor:pointer;margin-right:12px;font-size:1rem;"
+                    title="Editar Cliente"
                 >
                     <i class="fa-solid fa-pen"></i>
                 </button>
                 <button
                     type="button"
                     onclick="deleteClient('${escapeHTML(client.code)}')"
-                    style="background:none;border:none;color:var(--danger);cursor:pointer;"
-                    title="Excluir"
+                    style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:1rem;"
+                    title="Excluir Cliente"
                 >
                     <i class="fa-solid fa-trash"></i>
                 </button>
@@ -419,19 +467,107 @@ function renderClientsTable() {
     });
 }
 
+function openEditClientModal(code) {
+    const client = clientsDatabase.find(item => item.code === code);
+    if (!client) return;
+
+    document.getElementById('editModalCode').value = client.code;
+    document.getElementById('editModalName').value = client.name || '';
+    document.getElementById('editModalCpf').value = client.cpf || '';
+    document.getElementById('editModalAge').value = client.age || '';
+    document.getElementById('editModalPhone').value = client.phone || '';
+    document.getElementById('editModalEmail').value = client.email || '';
+    document.getElementById('editModalProcess').value = client.process || '';
+    document.getElementById('editModalType').value = client.type || '';
+    document.getElementById('editModalCourt').value = client.court || '';
+    document.getElementById('editModalStatus').value = client.status || 'Em Andamento';
+    document.getElementById('editModalDeadline').value = client.deadline || '';
+    document.getElementById('editModalFee').value = client.fee || '';
+    document.getElementById('editModalFeeStatus').value = client.feeStatus || 'Pendente';
+
+    document.getElementById('editClientModalOverlay').classList.add('active');
+}
+
+function closeEditClientModal() {
+    const modal = document.getElementById('editClientModalOverlay');
+    if (modal) modal.classList.remove('active');
+}
+
+function submitEditClientModal(event) {
+    event.preventDefault();
+
+    const code = document.getElementById('editModalCode').value;
+    const index = clientsDatabase.findIndex(item => item.code === code);
+    if (index === -1) return;
+
+    clientsDatabase[index] = {
+        ...clientsDatabase[index],
+        name: document.getElementById('editModalName').value.trim(),
+        cpf: document.getElementById('editModalCpf').value.trim(),
+        age: document.getElementById('editModalAge').value.trim(),
+        phone: document.getElementById('editModalPhone').value.trim(),
+        email: document.getElementById('editModalEmail').value.trim(),
+        process: document.getElementById('editModalProcess').value.trim(),
+        type: document.getElementById('editModalType').value.trim(),
+        court: document.getElementById('editModalCourt').value.trim(),
+        status: document.getElementById('editModalStatus').value,
+        deadline: document.getElementById('editModalDeadline').value.trim(),
+        fee: document.getElementById('editModalFee').value.trim(),
+        feeStatus: document.getElementById('editModalFeeStatus').value
+    };
+
+    saveData();
+    renderAll();
+
+    if (document.getElementById('fieldCode').value === code) {
+        fillFormWithClient(clientsDatabase[index]);
+    }
+
+    closeEditClientModal();
+    alert('Informações do cliente atualizadas com sucesso!');
+}
+
 
 /* =========================================================
-   10. TABELA DE PROCESSOS
+   9. ABA PROCESSOS & FILTROS (ATIVOS / ENCERRADOS)
    ========================================================= */
+
+function setProcessesFilter(filter, btnElement) {
+    currentProcessesFilter = filter;
+
+    const parentBar = btnElement.closest('.filter-tabs-bar');
+    if (parentBar) {
+        parentBar.querySelectorAll('.filter-tab-btn').forEach(b => b.classList.remove('active'));
+    }
+    btnElement.classList.add('active');
+
+    renderProcessesTable();
+}
 
 function renderProcessesTable() {
     const body = document.getElementById('processesTableBody');
-
+    const titleEl = document.getElementById('processesTableTitle');
     if (!body) return;
 
     body.innerHTML = '';
 
-    clientsDatabase.forEach(client => {
+    let filtered = clientsDatabase;
+    if (currentProcessesFilter === 'ativos') {
+        filtered = clientsDatabase.filter(c => c.status !== 'Encerrado');
+        if (titleEl) titleEl.textContent = 'Processos Ativos e em Andamento';
+    } else if (currentProcessesFilter === 'encerrados') {
+        filtered = clientsDatabase.filter(c => c.status === 'Encerrado');
+        if (titleEl) titleEl.textContent = 'Processos Finalizados / Encerrados';
+    } else {
+        if (titleEl) titleEl.textContent = 'Todos os Processos Registrados';
+    }
+
+    if (filtered.length === 0) {
+        body.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:30px;">Nenhum processo encontrado nesta categoria.</td></tr>`;
+        return;
+    }
+
+    filtered.forEach(client => {
         body.innerHTML += `
             <tr>
                 <td><strong>${escapeHTML(client.process)}</strong></td>
@@ -450,17 +586,17 @@ function renderProcessesTable() {
 
 
 /* =========================================================
-   11. PRAZOS
+   10. ABA PRAZOS
    ========================================================= */
 
 function renderDeadlines() {
     const container = document.getElementById('deadlinesContainer');
-
     if (!container) return;
 
     container.innerHTML = '';
 
     clientsDatabase.forEach(client => {
+        if (!client.deadline || client.deadline === 'A definir' || client.status === 'Encerrado') return;
 
         container.innerHTML += `
             <div class="timeline-item">
@@ -482,6 +618,213 @@ function renderDeadlines() {
             </div>
         `;
     });
+
+    customEventsDatabase.forEach(evt => {
+        const brDate = formatIsoToBrDate(evt.date);
+        const timeStr = evt.time ? ` às ${evt.time}` : '';
+
+        container.innerHTML += `
+            <div class="timeline-item" style="border-left-color: var(--success);">
+                <div>
+                    <div class="timeline-date" style="color: var(--success);">
+                        <i class="fa-solid fa-calendar-check"></i>
+                        ${escapeHTML(brDate)}${escapeHTML(timeStr)} - ${escapeHTML(evt.title)}
+                    </div>
+                    <div style="font-weight:600;margin-top:4px;color:var(--text-main);">
+                        Categoria: ${escapeHTML(evt.category)} ${evt.clientName ? `| Cliente: ${escapeHTML(evt.clientName)}` : ''}
+                    </div>
+                    ${evt.notes ? `<div style="font-size:0.85rem;color:var(--text-muted);">${escapeHTML(evt.notes)}</div>` : ''}
+                </div>
+                <button type="button" class="btn btn-secondary" onclick="deleteCustomEvent('${escapeHTML(evt.id)}')" title="Excluir compromisso">
+                    <i class="fa-solid fa-trash" style="color:var(--danger);"></i>
+                </button>
+            </div>
+        `;
+    });
+}
+
+
+/* =========================================================
+   11. ABA CALENDÁRIO (INTERATIVO)
+   ========================================================= */
+
+let calendarInstance = null;
+
+function getCalendarEvents() {
+    const events = [];
+
+    clientsDatabase.forEach(client => {
+        if (client.status === 'Encerrado') return;
+        const isoDate = parseBrDateToIso(client.deadline);
+        if (!isoDate) return;
+
+        const desc = client.deadline.replace(/^\d{2}\/\d{2}\/\d{4}\s*-?\s*/, '') || 'Prazo / Audiência';
+
+        events.push({
+            id: `CLIENT-${client.code}`,
+            title: `${client.name} - ${desc}`,
+            start: isoDate,
+            backgroundColor: '#2563eb',
+            borderColor: '#1d4ed8',
+            extendedProps: {
+                source: 'client',
+                clientName: client.name,
+                process: client.process,
+                court: client.court
+            }
+        });
+    });
+
+    customEventsDatabase.forEach(evt => {
+        const startDateTime = evt.time ? `${evt.date}T${evt.time}` : evt.date;
+        let bgColor = '#10b981';
+        if (evt.category === 'Audiência') bgColor = '#ef4444';
+        if (evt.category === 'Prazo Processual') bgColor = '#f59e0b';
+
+        events.push({
+            id: evt.id,
+            title: `[${evt.category}] ${evt.title}${evt.clientName && evt.clientName !== 'Escritório' ? ' - ' + evt.clientName : ''}`,
+            start: startDateTime,
+            backgroundColor: bgColor,
+            borderColor: bgColor,
+            extendedProps: {
+                source: 'custom',
+                eventId: evt.id,
+                category: evt.category,
+                clientName: evt.clientName,
+                notes: evt.notes
+            }
+        });
+    });
+
+    return events;
+}
+
+function renderCalendar() {
+    const calendarEl = document.getElementById('calendar');
+    if (!calendarEl || typeof FullCalendar === 'undefined') return;
+
+    if (calendarInstance) {
+        calendarInstance.destroy();
+    }
+
+    calendarInstance = new FullCalendar.Calendar(calendarEl, {
+        locale: 'pt-br',
+        initialView: 'dayGridMonth',
+        height: 'auto',
+        selectable: true,
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,listMonth'
+        },
+        buttonText: {
+            today: 'Hoje',
+            month: 'Mês',
+            week: 'Semana',
+            list: 'Lista'
+        },
+        events: getCalendarEvents(),
+        dateClick: function(info) {
+            openEventModal(info.dateStr);
+        },
+        eventClick: function(info) {
+            const props = info.event.extendedProps;
+            if (props.source === 'custom') {
+                const wantDelete = confirm(
+                    `Compromisso: ${info.event.title}\n` +
+                    `Data: ${info.event.start.toLocaleDateString('pt-BR')}\n` +
+                    `${props.notes ? 'Obs: ' + props.notes + '\n' : ''}\n` +
+                    `Deseja EXCLUIR este compromisso do calendário?`
+                );
+                if (wantDelete) {
+                    deleteCustomEvent(props.eventId);
+                }
+            } else {
+                alert(
+                    `Prazo de Cliente: ${info.event.title}\n` +
+                    `Processo: ${props.process || 'Não informado'}\n` +
+                    `Vara: ${props.court || 'Não informada'}\n\n` +
+                    `(Para alterar este prazo, edite a ficha do cliente.)`
+                );
+            }
+        }
+    });
+
+    calendarInstance.render();
+}
+
+function openEventModal(prefilledDate = '') {
+    const modal = document.getElementById('eventModalOverlay');
+    if (!modal) return;
+
+    document.getElementById('newEventForm').reset();
+
+    if (prefilledDate) {
+        document.getElementById('eventDate').value = prefilledDate;
+    }
+
+    const clientSelect = document.getElementById('eventClientSelect');
+    clientSelect.innerHTML = '<option value="">-- Compromisso Avulso / Escritório --</option>';
+    clientsDatabase.forEach(client => {
+        const opt = document.createElement('option');
+        opt.value = client.code;
+        opt.textContent = `${client.name} (${client.code})`;
+        clientSelect.appendChild(opt);
+    });
+
+    modal.classList.add('active');
+}
+
+function closeEventModal() {
+    const modal = document.getElementById('eventModalOverlay');
+    if (modal) modal.classList.remove('active');
+}
+
+function saveNewEvent(event) {
+    event.preventDefault();
+
+    const title = document.getElementById('eventTitle').value.trim();
+    const category = document.getElementById('eventType').value;
+    const date = document.getElementById('eventDate').value;
+    const time = document.getElementById('eventTime').value;
+    const clientCode = document.getElementById('eventClientSelect').value;
+    const notes = document.getElementById('eventNotes').value.trim();
+
+    if (!title || !date) {
+        alert('Informe o título e a data do compromisso.');
+        return;
+    }
+
+    let clientName = 'Escritório';
+    if (clientCode) {
+        const foundClient = clientsDatabase.find(c => c.code === clientCode);
+        if (foundClient) clientName = foundClient.name;
+    }
+
+    const newEvent = {
+        id: `EVT-${Date.now()}`,
+        title,
+        category,
+        date,
+        time,
+        clientCode,
+        clientName,
+        notes
+    };
+
+    customEventsDatabase.push(newEvent);
+    saveCustomEvents();
+    renderAll();
+    closeEventModal();
+
+    alert('Compromisso adicionado ao Calendário e à aba Prazos!');
+}
+
+function deleteCustomEvent(eventId) {
+    customEventsDatabase = customEventsDatabase.filter(e => e.id !== eventId);
+    saveCustomEvents();
+    renderAll();
 }
 
 
@@ -491,14 +834,11 @@ function renderDeadlines() {
 
 function moneyToNumber(value) {
     if (!value) return 0;
-
     const normalized = String(value)
         .replace(/[^\d,.-]/g, '')
         .replace(/\./g, '')
         .replace(',', '.');
-
     const number = parseFloat(normalized);
-
     return Number.isFinite(number) ? number : 0;
 }
 
@@ -511,7 +851,6 @@ function formatCurrency(value) {
 
 function renderFinancialTable() {
     const body = document.getElementById('financialTableBody');
-
     if (!body) return;
 
     body.innerHTML = '';
@@ -543,7 +882,6 @@ function updateFinancialSummary() {
 
     clientsDatabase.forEach(client => {
         const value = moneyToNumber(client.fee);
-
         if (client.feeStatus === 'Recebido') {
             received += value;
         } else {
@@ -558,7 +896,7 @@ function updateFinancialSummary() {
 
 
 /* =========================================================
-   13. FICHA DO CLIENTE
+   13. FICHA DO CLIENTE NO PAINEL
    ========================================================= */
 
 function fillFormWithClient(client) {
@@ -580,11 +918,9 @@ function fillFormWithClient(client) {
         if (element) element.value = value;
     });
 
-    const statusElement = document.getElementById('fieldStatus');
-
-    if (statusElement) {
-        statusElement.textContent = client.status || 'Aguardando Seleção';
-        statusElement.className = `badge ${getBadgeClass(client.status)}`;
+    const statusSelect = document.getElementById('fieldStatusSelect');
+    if (statusSelect) {
+        statusSelect.value = client.status || 'Em Andamento';
     }
 
     const suggestions = document.getElementById('suggestionsList');
@@ -592,6 +928,40 @@ function fillFormWithClient(client) {
 
     if (suggestions) suggestions.style.display = 'none';
     if (search) search.value = client.name;
+}
+
+function saveEditedClient(event) {
+    event.preventDefault();
+
+    const code = document.getElementById('fieldCode').value.trim();
+    if (!code) {
+        alert('Selecione um cliente na busca rápida ou na tabela antes de salvar.');
+        return;
+    }
+
+    const index = clientsDatabase.findIndex(item => item.code === code);
+    if (index === -1) {
+        alert('Cliente não encontrado.');
+        return;
+    }
+
+    clientsDatabase[index] = {
+        ...clientsDatabase[index],
+        name: document.getElementById('fieldName').value.trim(),
+        cpf: document.getElementById('fieldCpf').value.trim(),
+        age: document.getElementById('fieldAge').value.trim(),
+        process: document.getElementById('fieldProcess').value.trim(),
+        type: document.getElementById('fieldType').value.trim(),
+        court: document.getElementById('fieldCourt').value.trim(),
+        status: document.getElementById('fieldStatusSelect').value,
+        phone: document.getElementById('fieldPhone').value.trim(),
+        email: document.getElementById('fieldEmail').value.trim(),
+        deadline: document.getElementById('fieldDeadline').value.trim()
+    };
+
+    saveData();
+    renderAll();
+    alert(`Alterações de ${clientsDatabase[index].name} salvas com sucesso!`);
 }
 
 function resetForm() {
@@ -606,12 +976,8 @@ function resetForm() {
         if (element) element.value = '';
     });
 
-    const status = document.getElementById('fieldStatus');
-
-    if (status) {
-        status.textContent = 'Aguardando Seleção';
-        status.className = 'badge badge-pending';
-    }
+    const statusSelect = document.getElementById('fieldStatusSelect');
+    if (statusSelect) statusSelect.value = 'Em Andamento';
 
     const search = document.getElementById('clientSearch');
     if (search) search.value = '';
@@ -619,28 +985,14 @@ function resetForm() {
 
 
 /* =========================================================
-   14. EDITAR / EXCLUIR
+   14. EXCLUIR CLIENTE
    ========================================================= */
-
-function editClient(code) {
-    const client = clientsDatabase.find(item => item.code === code);
-
-    if (!client) return;
-
-    const painelLink = document.querySelector('.nav-link');
-    switchTab('painel', painelLink);
-    fillFormWithClient(client);
-}
 
 function deleteClient(code) {
     const client = clientsDatabase.find(item => item.code === code);
-
     if (!client) return;
 
-    const confirmed = confirm(
-        `Deseja realmente remover o cliente ${client.name} (${code})?`
-    );
-
+    const confirmed = confirm(`Deseja realmente remover o cliente ${client.name} (${code})?`);
     if (!confirmed) return;
 
     clientsDatabase = clientsDatabase.filter(item => item.code !== code);
@@ -662,7 +1014,6 @@ function setupSearch() {
     if (!searchInput || !suggestionsList) return;
 
     searchInput.addEventListener('input', event => {
-
         const query = event.target.value.toLowerCase().trim();
 
         if (!query) {
@@ -712,10 +1063,7 @@ function setupSearch() {
     });
 
     document.addEventListener('click', event => {
-        if (
-            !searchInput.contains(event.target) &&
-            !suggestionsList.contains(event.target)
-        ) {
+        if (!searchInput.contains(event.target) && !suggestionsList.contains(event.target)) {
             suggestionsList.style.display = 'none';
         }
     });
@@ -735,16 +1083,9 @@ function setupNewClientModal() {
 
     if (!modal || !form) return;
 
-    const closeModal = () => {
-        modal.classList.remove('active');
-    };
+    const closeModal = () => modal.classList.remove('active');
 
-    if (openButton) {
-        openButton.addEventListener('click', () => {
-            modal.classList.add('active');
-        });
-    }
-
+    if (openButton) openButton.addEventListener('click', () => modal.classList.add('active'));
     if (closeButton) closeButton.addEventListener('click', closeModal);
     if (cancelButton) cancelButton.addEventListener('click', closeModal);
 
@@ -768,6 +1109,17 @@ function setupNewClientModal() {
 
         const nextNumber = Math.max(1000, ...numbers) + 1;
 
+        const rawDate = document.getElementById('newFormDeadlineDate').value;
+        const desc = document.getElementById('newFormDeadlineDesc').value.trim();
+        let formattedDeadline = 'A definir';
+
+        if (rawDate) {
+            const brDate = formatIsoToBrDate(rawDate);
+            formattedDeadline = desc ? `${brDate} - ${desc}` : `${brDate} - Prazo / Audiência`;
+        } else if (desc) {
+            formattedDeadline = desc;
+        }
+
         const newClient = {
             code: `CLI-${nextNumber}`,
             name,
@@ -779,7 +1131,7 @@ function setupNewClientModal() {
             status: document.getElementById('newFormStatus').value,
             phone,
             email: document.getElementById('newFormEmail').value.trim() || '',
-            deadline: 'A definir',
+            deadline: formattedDeadline,
             fee: document.getElementById('newFormFee').value.trim() || 'R$ 0,00',
             feeStatus: 'Pendente'
         };
@@ -793,15 +1145,14 @@ function setupNewClientModal() {
         form.reset();
         closeModal();
 
-        switchTab('painel', document.querySelector('.nav-link'));
-
+        switchTab('painel');
         alert(`Cliente ${newClient.code} cadastrado com sucesso.`);
     });
 }
 
 
 /* =========================================================
-   17. MODAL DE EXPORTAÇÃO
+   17. EXPORTAÇÃO, BACKUP & IMPRESSÃO
    ========================================================= */
 
 function openExportModal() {
@@ -814,18 +1165,14 @@ function closeExportModal() {
     if (modal) modal.classList.remove('active');
 }
 
-
-/* =========================================================
-   18. GERAR BACKUP E DOWNLOADS
-   ========================================================= */
-
 function createBackupObject() {
     return {
         app: 'Prazzo',
-        version: '1.0',
+        version: '1.4',
         exportedAt: new Date().toISOString(),
         profile: userProfile,
-        clients: clientsDatabase
+        clients: clientsDatabase,
+        events: customEventsDatabase
     };
 }
 
@@ -837,32 +1184,18 @@ function downloadFile(content, filename, type) {
     const blob = new Blob([content], { type });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
-
     link.href = url;
     link.download = filename;
-
     document.body.appendChild(link);
     link.click();
     link.remove();
-
     URL.revokeObjectURL(url);
 }
-
-
-/* =========================================================
-   19. EXPORTAR JSON E CSV
-   ========================================================= */
 
 function exportData() {
     const json = createBackupJSON();
     const date = new Date().toISOString().slice(0, 10);
-
-    downloadFile(
-        json,
-        `prazzo-backup-${date}.json`,
-        'application/json;charset=utf-8'
-    );
-
+    downloadFile(json, `prazzo-backup-${date}.json`, 'application/json;charset=utf-8');
     alert('Backup JSON exportado com sucesso.');
 }
 
@@ -891,20 +1224,9 @@ function exportCSV() {
 
     const content = '\uFEFF' + csv;
     const date = new Date().toISOString().slice(0, 10);
-
-    downloadFile(
-        content,
-        `prazzo-clientes-${date}.csv`,
-        'text/csv;charset=utf-8'
-    );
-
+    downloadFile(content, `prazzo-clientes-${date}.csv`, 'text/csv;charset=utf-8');
     alert('Arquivo CSV exportado com sucesso.');
 }
-
-
-/* =========================================================
-   20. COMPARTILHAMENTO & E-MAIL & COPIAR DADOS
-   ========================================================= */
 
 async function shareData() {
     const json = createBackupJSON();
@@ -915,7 +1237,6 @@ async function shareData() {
     try {
         if (navigator.share && typeof File !== 'undefined') {
             const file = new File([blob], filename, { type: 'application/json' });
-
             if (!navigator.canShare || navigator.canShare({ files: [file] })) {
                 await navigator.share({
                     title: 'Backup do Prazzo',
@@ -935,7 +1256,6 @@ async function shareData() {
         }
 
         alert('O compartilhamento nativo não é suportado neste navegador. Use a opção de Backup JSON.');
-
     } catch (error) {
         if (error.name !== 'AbortError') {
             console.error('Erro ao compartilhar:', error);
@@ -949,18 +1269,15 @@ function sendByEmail() {
     const body = encodeURIComponent(
         `Olá,\n\nSegue o backup do sistema Prazzo.\n\nQuantidade de clientes: ${clientsDatabase.length}\n\nAtenciosamente,\n${userProfile.name || 'Usuário Prazzo'}\n${userProfile.oab || ''}`
     );
-
     window.location.href = `mailto:?subject=${subject}&body=${body}`;
 }
 
 async function copyDataToClipboard() {
     const json = createBackupJSON();
-
     try {
         await navigator.clipboard.writeText(json);
         alert('Dados copiados para a área de transferência.');
     } catch (error) {
-        console.error('Erro ao copiar via clipboard:', error);
         const textarea = document.createElement('textarea');
         textarea.value = json;
         document.body.appendChild(textarea);
@@ -971,14 +1288,8 @@ async function copyDataToClipboard() {
     }
 }
 
-
-/* =========================================================
-   21. RELATÓRIO PARA IMPRESSÃO / PDF
-   ========================================================= */
-
 function printReport() {
     const date = new Date().toLocaleString('pt-BR');
-
     const rows = clientsDatabase.map(client => `
         <tr>
             <td>${escapeHTML(client.code)}</td>
@@ -1007,9 +1318,6 @@ function printReport() {
                 th, td { border: 1px solid #d1d5db; padding: 8px; text-align: left; }
                 th { background: #f1f5f9; }
                 .footer { margin-top: 30px; font-size: 11px; color: #64748b; }
-                @media print {
-                    body { margin: 20px; }
-                }
             </style>
         </head>
         <body>
@@ -1033,76 +1341,57 @@ function printReport() {
                         <th>Honorários</th>
                     </tr>
                 </thead>
-                <tbody>
-                    ${rows}
-                </tbody>
+                <tbody>${rows}</tbody>
             </table>
             <div class="footer">Documento gerado pelo sistema Prazzo.</div>
-            <script>
-                window.onload = function() { window.print(); };
-            <\/script>
+            <script>window.onload = function() { window.print(); };<\/script>
         </body>
         </html>
     `;
 
     const reportWindow = window.open('', '_blank', 'width=1200,height=800');
-
     if (!reportWindow) {
         alert('O navegador bloqueou a janela de impressão. Permita pop-ups para o Prazzo.');
         return;
     }
-
     reportWindow.document.open();
     reportWindow.document.write(report);
     reportWindow.document.close();
 }
-
-
-/* =========================================================
-   22. IMPORTAR BACKUP JSON
-   ========================================================= */
 
 function importJSON(event) {
     const file = event.target.files[0];
     if (!file) return;
 
     const reader = new FileReader();
-
     reader.onload = function(loadEvent) {
         try {
             const backup = JSON.parse(loadEvent.target.result);
-
             if (!backup || !Array.isArray(backup.clients)) {
                 throw new Error('Formato de backup inválido.');
             }
 
-            const confirmed = confirm(
-                'Importar este backup substituirá os dados atuais deste dispositivo. Deseja continuar?'
-            );
-
-            if (!confirmed) {
+            if (!confirm('Importar este backup substituirá os dados atuais deste dispositivo. Deseja continuar?')) {
                 event.target.value = '';
                 return;
             }
 
             clientsDatabase = backup.clients;
-
+            if (Array.isArray(backup.events)) {
+                customEventsDatabase = backup.events;
+            }
             if (backup.profile && typeof backup.profile === 'object') {
-                userProfile = {
-                    ...defaultProfile,
-                    ...backup.profile
-                };
+                userProfile = { ...defaultProfile, ...backup.profile };
             }
 
             saveData();
+            saveCustomEvents();
             saveProfileData();
-
             renderAll();
             resetForm();
 
             alert(`Backup importado com sucesso.\n\n${clientsDatabase.length} cliente(s) restaurado(s).`);
             closeExportModal();
-
         } catch (error) {
             console.error('Erro ao importar backup:', error);
             alert('Não foi possível importar o arquivo. Verifique se ele é um backup JSON válido do Prazzo.');
@@ -1110,25 +1399,15 @@ function importJSON(event) {
             event.target.value = '';
         }
     };
-
     reader.readAsText(file);
 }
-
-function setupImport() {
-    const input = document.getElementById('importFile');
-    if (!input) return;
-    input.addEventListener('change', importJSON);
-}
-
-
-/* =========================================================
-   23. FECHAR MODAIS CLICANDO FORA OU VIA TECLA ESC
-   ========================================================= */
 
 function setupModalClosing() {
     document.addEventListener('click', event => {
         const modalIds = [
             'modalOverlay',
+            'editClientModalOverlay',
+            'eventModalOverlay',
             'profileModalOverlay',
             'exportModalOverlay'
         ];
@@ -1143,7 +1422,6 @@ function setupModalClosing() {
 
     document.addEventListener('keydown', event => {
         if (event.key !== 'Escape') return;
-
         document.querySelectorAll('.modal-overlay.active').forEach(modal => {
             modal.classList.remove('active');
         });
@@ -1152,17 +1430,17 @@ function setupModalClosing() {
 
 
 /* =========================================================
-   24. INICIALIZAÇÃO
+   18. INICIALIZAÇÃO
    ========================================================= */
-
+""
 document.addEventListener('DOMContentLoaded', () => {
     const hasSavedProfile = localStorage.getItem('jusgestao_perfil');
 
     renderAll();
     setupSearch();
     setupNewClientModal();
-    setupImport();
     setupModalClosing();
+    initDarkMode();
 
     if (!hasSavedProfile) {
         setTimeout(() => {
@@ -1170,3 +1448,26 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 500);
     }
 });
+
+
+
+
+function confirmDeleteAccount() {
+    if (!confirm('ATENÇÃO: Deseja realmente excluir permanentemente a sua conta e todos os dados guardados?')) return;
+    
+    const senhaInformada = prompt('Para confirmar a exclusão da conta, digite a sua senha de acesso:');
+    if (senhaInformada === null) return; // Se o usuário cancelar
+
+    // Recupera o perfil salvo para checar a senha
+    const perfilSalvo = JSON.parse(localStorage.getItem('jusgestao_perfil')) || { password: '123' };
+    const senhaCorreta = perfilSalvo.password || '123';
+
+    if (senhaInformada === senhaCorreta) {
+        // Limpa todo o armazenamento local do sistema
+        localStorage.clear();
+        alert('Conta e dados excluídos com sucesso.');
+        window.location.href = 'login/index.html';
+    } else {
+        alert('Senha incorreta! A exclusão foi cancelada por segurança.');
+    }
+}
